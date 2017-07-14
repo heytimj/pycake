@@ -1,0 +1,10 @@
+*.pyc
+*.xlsx
+*.cfg
+test.py
+/dist
+/venv
+/build
+/pycake.egg-info
+/doc
+MANIFEST
