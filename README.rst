@@ -2,6 +2,11 @@ Introduction
 ------------
 **pycake** is a python wrapper intended to make CAKE's API seem more RESTful. For example, if you want to edit one setting on one offer, you can use the ``edit_offer()`` method and only pass the ``offer_id`` and the key-value pair for the setting you wish to change. Example: ``edit_offer(offer_id=4, click_cookie_days=60)``. In short, if settings or filters are not explicitly set when calling a method, they are automatically skipped or all results returned (depending on the method type). 
 
+New in Version 1.1.0
+--------------------
+- ``conversions()`` method swtiched from v15 to v16
+- ``clicks()`` method switched from v11 to v12
+
 Python
 ------
 Supports 2.x and 3.x
