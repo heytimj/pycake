@@ -1487,8 +1487,8 @@ class CAKEApi(object):
 
         parameters = OrderedDict()
         parameters['api_key'] = self.api_key
-        parameters['start_date'] = start_date
-        parameters['end_date'] = end_date
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
         parameters['source_affiliate_id'] = source_affiliate_id
         parameters['brand_advertiser_id'] = brand_advertiser_id
         parameters['site_offer_id'] = site_offer_id
@@ -1627,8 +1627,8 @@ class CAKEApi(object):
 
         parameters = OrderedDict()
         parameters['api_key'] = self.api_key
-        parameters['start_date'] = start_date
-        parameters['end_date'] = end_date
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
         parameters['affiliate_id'] = affiliate_id
         parameters['advertiser_id'] = advertiser_id
         parameters['offer_id'] = offer_id
@@ -1697,8 +1697,8 @@ class CAKEApi(object):
 
         parameters = OrderedDict()
         parameters['api_key'] = self.api_key
-        parameters['start_date'] = start_date
-        parameters['end_date'] = end_date
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
         parameters['role_id'] = role_id
 
         return self.__api_call(url=api_url, params=parameters)
@@ -1715,8 +1715,8 @@ class CAKEApi(object):
 
         parameters = OrderedDict()
         parameters['api_key'] = self.api_key
-        parameters['start_date'] = start_date
-        parameters['end_date'] = end_date
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
         parameters['affiliate_id'] = affiliate_id
         parameters['conversion_id'] = conversion_id
         parameters['order_id'] = order_id
