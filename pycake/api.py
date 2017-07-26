@@ -1350,7 +1350,7 @@ class CAKEApi(object):
             source_affiliate_id='0', subid_id='', site_offer_id='0',
             source_affiliate_tag_id='0', site_offer_tag_id='0',
             source_affiliate_manager_id='0', brand_advertiser_manager_id='0',
-            event_id='0', event_type='all', ):
+            event_id='0', event_type='all'):
 
         api_url = '{}://{}/api/5/reports.asmx/CampaignSummary'.format(
             self.protocol, self.admin_domain)
@@ -1378,7 +1378,7 @@ class CAKEApi(object):
             self, start_date, end_date, affiliate_id='0', advertiser_id='0',
             offer_id='0', campaign_id='0', creative_id='0',
             price_format_id='0', include_duplicates='FALSE',
-            include_tests='FALSE', start_at_row='0', row_limit='0', ):
+            include_tests='FALSE', start_at_row='0', row_limit='0'):
 
         api_url = '{}://{}/api/12/reports.asmx/Clicks'.format(
             self.protocol, self.admin_domain)
@@ -1476,11 +1476,11 @@ class CAKEApi(object):
 
 
     @__required_params(['start_date', 'end_date'])
-    def daily_summary_export(
-        self, start_date, end_date, source_affiliate_id='0',
-        brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
-        campaign_id='0', creative_id='0', account_manager_id='0',
-        include_tests='FALSE', ):
+    def daily_summary(
+            self, start_date, end_date, source_affiliate_id='0',
+            brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
+            campaign_id='0', creative_id='0', account_manager_id='0',
+            include_tests='FALSE'):
 
         api_url = '{}://{}/api/2/reports.asmx/DailySummaryExport'.format(
             self.protocol, self.admin_domain)
@@ -1613,6 +1613,31 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
         
+        return self.__api_call(url=api_url, params=parameters)
+
+
+    @__required_params(['start_date', 'end_date'])
+    def lite_clicks_daily_summary(
+            self, start_date, end_date, affiliate_id='0', advertiser_id='0',
+            offer_id='0', vertical_id='0', campaign_id='0', creative_id='0',
+            account_manager_id='0', include_tests='FALSE'):
+
+        api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/DailySummaryExport'
+            .format(self.protocol, self.admin_domain))
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = start_date
+        parameters['end_date'] = end_date
+        parameters['affiliate_id'] = affiliate_id
+        parameters['advertiser_id'] = advertiser_id
+        parameters['offer_id'] = offer_id
+        parameters['vertical_id'] = vertical_id
+        parameters['campaign_id'] = campaign_id
+        parameters['creative_id'] = creative_id
+        parameters['account_manager_id'] = account_manager_id
+        parameters['include_tests'] = include_tests
+
         return self.__api_call(url=api_url, params=parameters)
 
 
