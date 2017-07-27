@@ -1409,13 +1409,13 @@ class CAKEApi(object):
             source_affiliate_tag_id='0', brand_advertiser_tag_id='0',
             site_offer_tag_id='0', campaign_id='0', creative_id='0',
             price_format_id='0', source_type='all',
-            macro_conversion_type='both', disposition_type='all',
+            payment_percentage_filter='both', disposition_type='all',
             disposition_id='0', source_affiliate_billing_status='all',
             brand_advertiser_billing_status='all', test_filter='non_tests',
             start_at_row='0', row_limit='0',
             sort_field='event_conversion_date', sort_descending='FALSE'):
 
-        api_url = '{}://{}/api/16/reports.asmx/EventConversions'.format(
+        api_url = '{}://{}/api/17/reports.asmx/EventConversions'.format(
             self.protocol, self.admin_domain)
 
         parameters = OrderedDict()
@@ -1436,7 +1436,7 @@ class CAKEApi(object):
         parameters['creative_id'] = creative_id
         parameters['price_format_id'] = price_format_id
         parameters['source_type'] = source_type
-        parameters['macro_conversion_type'] = macro_conversion_type
+        parameters['payment_percentage_filter'] = payment_percentage_filter
         parameters['disposition_type'] = disposition_type
         parameters['disposition_id'] = disposition_id
         parameters['source_affiliate_billing_status'] = (
