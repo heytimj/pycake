@@ -1228,6 +1228,33 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+    def export_offers(
+            self, offer_id='0', offer_name='', advertiser_id='0',
+            vertical_id='0', offer_type_id='0', media_type_id='0',
+            offer_status_id='0', tag_id='0', start_at_row='0', row_limit='0',
+            sort_field='offer_id', sort_descending='FALSE'):
+
+        api_url = '{}://{}/api/6/export.asmx/Offers'.format(self.protocol,
+            self.admin_domain)
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['offer_id'] = offer_id
+        parameters['offer_name'] = offer_name
+        parameters['advertiser_id'] = advertiser_id
+        parameters['vertical_id'] = vertical_id
+        parameters['offer_type_id'] = offer_type_id
+        parameters['media_type_id'] = media_type_id
+        parameters['offer_status_id'] = offer_status_id
+        parameters['tag_id'] = tag_id
+        parameters['start_at_row'] = start_at_row
+        parameters['row_limit'] = row_limit
+        parameters['sort_field'] = sort_field
+        parameters['sort_descending'] = sort_descending
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
     @__required_params(['start_date', 'end_date'])
     def export_pixel_log_requests(
         self, start_date, end_date, advertiser_id='0', offer_id='0', 
