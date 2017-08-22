@@ -1914,5 +1914,33 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+#-----------------------------AFFILIATE------------------------------#
+
+
+    @__required_params(['affiliate_id', 'affiliate_api_key'])
+    def affiliate_offer_feed(
+            self, affiliate_id, affiliate_api_key, campaign_name='',
+            media_type_category_id='0', vertical_category_id='0',
+            vertical_id='0', offer_status_id='0', tag_id='0', start_at_row='0',
+            row_limit='0'):
+
+        api_url = '{}://{}/affiliates/api/4/offers.asmx/OfferFeed'.format(
+            self.protocol, self.admin_domain) 
+
+        parameters = OrderedDict()
+        parameters['affiliate_id'] = affiliate_id
+        parameters['api_key'] = affiliate_api_key
+        parameters['campaign_name'] = campaign_name
+        parameters['media_type_category_id'] = media_type_category_id
+        parameters['vertical_category_id'] = vertical_category_id
+        parameters['vertical_id'] = vertical_id
+        parameters['offer_status_id'] = offer_status_id
+        parameters['tag_id'] = tag_id
+        parameters['start_at_row'] = start_at_row
+        parameters['row_limit'] = row_limit
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
 
 
