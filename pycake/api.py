@@ -1428,6 +1428,35 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+    @__required_params(['changes_since'])
+    def conversion_changes(
+            self, changes_since, include_new_conversions='FALSE',
+            affiliate_id='0', advertiser_id='0', offer_id='0',
+            campaign_id='0', creative_id='0', include_tests='FALSE',
+            start_at_row='0', row_limit='0', sort_field='conversion_id',
+            sort_descending='FALSE'):
+
+        api_url = '{}://{}/api/10/reports.asmx/ConversionChanges'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['changes_since'] = str(changes_since)
+        parameters['include_new_conversions'] = include_new_conversions
+        parameters['affiliate_id'] = affiliate_id
+        parameters['advertiser_id'] = advertiser_id
+        parameters['offer_id'] = offer_id
+        parameters['campaign_id'] = campaign_id
+        parameters['creative_id'] = creative_id
+        parameters['include_tests'] = include_tests
+        parameters['start_at_row'] = start_at_row
+        parameters['row_limit'] = row_limit
+        parameters['sort_field'] = sort_field
+        parameters['sort_descending'] = sort_descending
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
     @__required_params(['start_date', 'end_date'])
     def conversions(
             self, start_date, end_date, event_type='all', event_id='0',
