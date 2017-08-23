@@ -2,6 +2,11 @@ Introduction
 ------------
 **pycake** is a python wrapper intended to make CAKE's API seem more RESTful. For example, if you want to edit one setting on one offer, you can use the ``edit_offer()`` method and only pass the ``offer_id`` and the key-value pair for the setting you wish to change. Example: ``edit_offer(offer_id=4, click_cookie_days=60)``. In short, if settings or filters are not explicitly set when calling a method, they are automatically skipped or all results returned (depending on the method type). 
 
+Bug Fix 1.6.1
+-------------
+-``export_campaigns()`` method requires at least one of the following args: ``offer_id``, ``affiliate_id``, ``campaign_id``.
+
+
 New in Version 1.6.0
 --------------------
 - ``affiliate_offer_feed()`` method added 

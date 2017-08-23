@@ -1177,6 +1177,7 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+    @__must_have_one(['offer_id', 'affiliate_id', 'campaign_id'])
     def export_campaigns(
             self, campaign_id='0', offer_id='0', affiliate_id='0',
             account_status_id='0', media_type_id='0', start_at_row='0',
