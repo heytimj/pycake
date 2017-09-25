@@ -1510,6 +1510,31 @@ class CAKEApi(object):
 
 
     @__required_params(['start_date', 'end_date'])
+    @__must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
+    def country_summary(
+            self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
+            advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
+            revenue_filter='conversions_and_events'):
+
+        api_url = '{}://{}/api/1/reports.asmx/CountrySummary'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
+        parameters['affiliate_id'] = affiliate_id
+        parameters['affiliate_tag_id'] = affiliate_tag_id
+        parameters['advertiser_id'] = advertiser_id
+        parameters['offer_id'] = offer_id
+        parameters['campaign_id'] = campaign_id
+        parameters['event_id'] = event_id
+        parameters['revenue_filter'] = revenue_filter
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
+    @__required_params(['start_date', 'end_date'])
     @__must_have_one(['site_offer_id', 'campaign_id'])
     def creative_summary(
             self, start_date, end_date, site_offer_id='0', campaign_id='0',
@@ -1670,6 +1695,31 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
         
+        return self.__api_call(url=api_url, params=parameters)
+
+
+    @__required_params(['start_date', 'end_date'])
+    @__must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
+    def lite_clicks_country_summary(
+            self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
+            advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
+            revenue_filter='conversions_and_events'):
+
+        api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/CountrySummary'
+            .format(self.protocol, self.admin_domain))
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
+        parameters['affiliate_id'] = affiliate_id
+        parameters['affiliate_tag_id'] = affiliate_tag_id
+        parameters['advertiser_id'] = advertiser_id
+        parameters['offer_id'] = offer_id
+        parameters['campaign_id'] = campaign_id
+        parameters['event_id'] = event_id
+        parameters['revenue_filter'] = revenue_filter
+
         return self.__api_call(url=api_url, params=parameters)
 
 

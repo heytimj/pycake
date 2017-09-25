@@ -2,14 +2,9 @@ Introduction
 ------------
 **pycake** is a python wrapper intended to make CAKE's API seem more RESTful. For example, if you want to edit one setting on one offer, you can use the ``edit_offer()`` method and only pass the ``offer_id`` and the key-value pair for the setting you wish to change. Example: ``edit_offer(offer_id=4, click_cookie_days=60)``. In short, if settings or filters are not explicitly set when calling a method, they are automatically skipped or all results returned (depending on the method type). 
 
-Bug Fix 1.6.1
--------------
--``export_campaigns()`` method requires at least one of the following args: ``offer_id``, ``affiliate_id``, ``campaign_id``.
-
-
-New in Version 1.6.0
---------------------
-- ``affiliate_offer_feed()`` method added 
+New in 1.7.0
+------------
+- Added `CAKEApi.country_summary()` and `CAKEApi.lite_clicks_country_summary()`
 
 Python
 ------
@@ -22,7 +17,7 @@ Use
 
 .. code:: bash
 
-    $ pip install pycake --upgrade
+    $ pip3 install pycake --upgrade
     
 **Initialize a CAKEApi object with an API key**
 
@@ -49,15 +44,16 @@ You can initialize a CAKEApi object without an API key and then use the ``set_ap
     >>> username = 'email@domain.com'
     >>> password = 'SomePassword123'
     >>> ckapi.set_api_key(username=username, password=password)
-    >>> print ckapi.api_key
+    >>> print(ckapi.api_key)
     gjhfgGJhgjhGgfHGjhg
+    >>> conversions = ckapi.conversions(start_date='2017-5-1', end_date='2017-6-1')
 
 *Note:* If the ``username`` and ``password`` are not valid admin credentials the object's ``api_key`` attribute will be set as
 ``None``. Calling subsequent object methods other than ``set_api_key()``
 will raise an error.
 
-Supported Methods
------------------
+Supported `CAKEApi()` Methods
+-----------------------------
 
 **API KEY**
 
@@ -113,12 +109,14 @@ Supported Methods
 - ``conversion_changes()``
 - ``conversions()``
 - ``creative_summary()``
+- ``country_summary()``
 - ``daily_summary()``
 - ``leads_by_buyer()``
 - ``leads_by_affiliate()``
 - ``lite_clicks_advertiser_summary()``
 - ``lite_clicks_affiliate_summary()``
 - ``lite_clicks_campaign_summary()``
+- ``lite_clicks_country_summary()``
 - ``lite_clicks_daily_summary()``
 - ``lite_clicks_offer_summary()``
 - ``lite_clicks_sub_id_summary()``
