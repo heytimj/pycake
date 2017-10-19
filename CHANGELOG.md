@@ -1,7 +1,12 @@
 # pycake Changelog
 
+### v1.8.0
+- October 19, 2017
+- Added `CAKEApi.add_creative()`
+- Fixed incorrect date year in v1.7.0 entry of CHANGELOG.md
+
 ### v1.7.0
-- September 25, 2016
+- September 25, 2017
 - Added `CAKEApi.country_summary()` and `CAKEApi.lite_clicks_country_summary()`
 - Added CHANGELOG.md
 - Updated README.rst

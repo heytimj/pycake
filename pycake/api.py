@@ -152,11 +152,11 @@ class CAKEApi(object):
 
     @__required_params(['advertiser_name'])
     def add_advertiser(
-        self, advertiser_name, third_party_name='', account_status_id='1',
-        online_signup='FALSE', signup_ip_address='', website='',
-        billing_cycle_id='3', account_manager_id='0', address_street='',
-        address_street2='', address_city='', address_state='',
-        address_zip_code='', address_country='', notes='', tags=''):
+            self, advertiser_name, third_party_name='', account_status_id='1',
+            online_signup='FALSE', signup_ip_address='', website='',
+            billing_cycle_id='3', account_manager_id='0', address_street='',
+            address_street2='', address_city='', address_state='',
+            address_zip_code='', address_country='', notes='', tags=''):
 
         api_url = '{}://{}/api/1/addedit.asmx/Advertiser'.format(
             self.protocol, self.admin_domain)
@@ -260,8 +260,8 @@ class CAKEApi(object):
         ['affiliate_id', 'blacklist_reason_id', 'redirect_type'])
     @__must_have_one(['advertiser_id', 'offer_id'])
     def add_blacklist(
-        self, affiliate_id, blacklist_reason_id, redirect_type, sub_id='',
-        advertiser_id='0', offer_id='0', blacklist_date=datetime.now()):
+            self, affiliate_id, blacklist_reason_id, redirect_type, sub_id='',
+            advertiser_id='0', offer_id='0', blacklist_date=datetime.now()):
 
         api_url = '{}://{}/api/1/addedit.asmx/Blacklist'.format(
             self.protocol, self.admin_domain)
@@ -284,10 +284,11 @@ class CAKEApi(object):
     @__required_params(['buyer_name', 'account_manager_id'])
     @__if_one_then_all(['credit_type', 'credit_limit'])
     def add_buyer(
-        self, buyer_name, account_manager_id, account_status_id='1',
-        address_street='', address_street2='', address_city='',
-        address_state='', address_zip_code='', address_country='', website='',
-        billing_cycle_id='3', credit_type='unlimited', credit_limit='-1'):
+            self, buyer_name, account_manager_id, account_status_id='1',
+            address_street='', address_street2='', address_city='',
+            address_state='', address_zip_code='', address_country='',
+            website='', billing_cycle_id='3', credit_type='unlimited',
+            credit_limit='-1'):
 
         api_url = '{}://{}/api/1/addedit.asmx/Buyer'.format(self.protocol,
             self.admin_domain)
@@ -314,14 +315,14 @@ class CAKEApi(object):
 
     @__required_params(['buyer_id', 'vertical_id', 'buyer_contract_name'])
     def add_buyer_contract(
-        self, buyer_id, vertical_id, buyer_contract_name,
-        account_status_id='1', offer_id='0', replace_returns='off',
-        replacements_non_returnable='off', max_return_age_days='30',
-        buy_upsells='off', vintage_leads='off', min_lead_age_minutes='0',
-        max_lead_age_minutes='7200', posting_wait_seconds='0',
-        default_confirmation_page_link='', max_post_errors='10',
-        send_alert_only='off', rank='0', email_template_id='0',
-        portal_template_id='0'):
+            self, buyer_id, vertical_id, buyer_contract_name,
+            account_status_id='1', offer_id='0', replace_returns='off',
+            replacements_non_returnable='off', max_return_age_days='30',
+            buy_upsells='off', vintage_leads='off', min_lead_age_minutes='0',
+            max_lead_age_minutes='7200', posting_wait_seconds='0',
+            default_confirmation_page_link='', max_post_errors='10',
+            send_alert_only='off', rank='0', email_template_id='0',
+            portal_template_id='0'):
 
         api_url = '{}://{}/api/1/addedit.asmx/BuyerContract'.format(
             self.protocol, self.admin_domain)
@@ -425,6 +426,32 @@ class CAKEApi(object):
         parameters['pixel_html'] = pixel_html
         parameters['test_link'] = test_link
         parameters['redirect_domain'] = redirect_domain
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
+    @__required_params(['creative_name', 'offer_id', 'creative_type_id'])
+    def add_creative(
+            self, creative_name, offer_id, creative_type_id,
+            third_party_name='', creative_status_id='1', width='-1',
+            height='-1', offer_link='', allow_link_override='FALSE', notes=''):
+
+        api_url = '{}://{}/api/1/addedit.asmx/Creative'.format(
+            self.protocol, self.admin_domain)
+        
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['creative_id'] = 0
+        parameters['offer_id'] = offer_id
+        parameters['creative_name'] = creative_name
+        parameters['third_party_name'] = third_party_name
+        parameters['creative_type_id'] = creative_type_id
+        parameters['creative_status_id'] = creative_status_id
+        parameters['width'] = width
+        parameters['height'] = height
+        parameters['offer_link'] = offer_link
+        parameters['allow_link_override'] = allow_link_override
+        parameters['notes'] = notes
 
         return self.__api_call(url=api_url, params=parameters)
 
@@ -572,11 +599,11 @@ class CAKEApi(object):
 
     @__required_params(['advertiser_id'])
     def edit_advertiser(
-        self, advertiser_id, advertiser_name='', third_party_name='',
-        account_status_id='0', website='', billing_cycle_id='0',
-        account_manager_id='0', address_street='', address_street2='',
-        address_city='', address_state='', address_zip_code='',
-        address_country='', notes='', tags=''):
+            self, advertiser_id, advertiser_name='', third_party_name='',
+            account_status_id='0', website='', billing_cycle_id='0',
+            account_manager_id='0', address_street='', address_street2='',
+            address_city='', address_state='', address_zip_code='',
+            address_country='', notes='', tags=''):
 
         advertiser_export = self.export_advertisers(
             advertiser_id=advertiser_id, force_json=True)
@@ -768,11 +795,11 @@ class CAKEApi(object):
 
     @__required_params(['buyer_id'])
     def edit_buyer(
-        self, buyer_id, buyer_name='', account_status_id='0',
-        account_manager_id='0', address_street='', address_street2='',
-        address_city='', address_state='', address_zip_code='',
-        address_country='', website='', billing_cycle_id='0',
-        credit_type='no_change', credit_limit='-1'):
+            self, buyer_id, buyer_name='', account_status_id='0',
+            account_manager_id='0', address_street='', address_street2='',
+            address_city='', address_state='', address_zip_code='',
+            address_country='', website='', billing_cycle_id='0',
+            credit_type='no_change', credit_limit='-1'):
 
         api_url = '{}://{}/api/1/addedit.asmx/Buyer'.format(self.protocol,
             self.admin_domain)
@@ -799,14 +826,14 @@ class CAKEApi(object):
 
     @__required_params(['buyer_contract_id'])
     def edit_buyer_contract(
-        self, buyer_contract_id, buyer_contract_name='',
-        account_status_id='0', offer_id='0', replace_returns='no_change',
-        replacements_non_returnable='no_change', max_return_age_days='-1',
-        buy_upsells='no_change', vintage_leads='no_change',
-        min_lead_age_minutes='-1', max_lead_age_minutes='-1',
-        posting_wait_seconds='-1', default_confirmation_page_link='',
-        max_post_errors='-1', send_alert_only='no_change', rank='-1',
-        email_template_id='0', portal_template_id='0'):
+            self, buyer_contract_id, buyer_contract_name='',
+            account_status_id='0', offer_id='0', replace_returns='no_change',
+            replacements_non_returnable='no_change', max_return_age_days='-1',
+            buy_upsells='no_change', vintage_leads='no_change',
+            min_lead_age_minutes='-1', max_lead_age_minutes='-1',
+            posting_wait_seconds='-1', default_confirmation_page_link='',
+            max_post_errors='-1', send_alert_only='no_change', rank='-1',
+            email_template_id='0', portal_template_id='0'):
 
         api_url = '{}://{}/api/1/addedit.asmx/BuyerContract'.format(
             self.protocol, self.admin_domain)
@@ -1258,9 +1285,9 @@ class CAKEApi(object):
 
     @__required_params(['start_date', 'end_date'])
     def export_pixel_log_requests(
-        self, start_date, end_date, advertiser_id='0', offer_id='0', 
-        converted_only='FALSE', start_at_row='0', row_limit='0',
-        sort_descending='FALSE'):
+            self, start_date, end_date, advertiser_id='0', offer_id='0', 
+            converted_only='FALSE', start_at_row='0', row_limit='0',
+            sort_descending='FALSE'):
 
         api_url = '{}://{}/api/1/export.asmx/PixelLogRequests'.format(
             self.protocol, self.admin_domain)
@@ -1813,9 +1840,9 @@ class CAKEApi(object):
 
     @__required_params(['start_date', 'end_date'])
     def order_details(
-        self, start_date, end_date, affiliate_id='0', conversion_id='0',
-        order_id='', start_at_row='0', row_limit='0', sort_field='order_id',
-        sort_descending='FALSE'):
+            self, start_date, end_date, affiliate_id='0', conversion_id='0',
+            order_id='', start_at_row='0', row_limit='0',
+            sort_field='order_id', sort_descending='FALSE'):
 
         api_url = '{}://{}/api/1/reports.asmx/OrderDetails'.format(
             self.protocol, self.admin_domain)
