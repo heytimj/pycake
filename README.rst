@@ -2,9 +2,15 @@ Introduction
 ------------
 **pycake** is a python wrapper intended to make CAKE's API seem more RESTful. For example, if you want to edit one setting on one offer, you can use the ``edit_offer()`` method and only pass the ``offer_id`` and the key-value pair for the setting you wish to change. Example: ``edit_offer(offer_id=4, click_cookie_days=60)``. In short, if settings or filters are not explicitly set when calling a method, they are automatically skipped or all results returned (depending on the method type). 
 
-New in 1.8.0
+New in 1.9.0
 ------------
-- Added `CAKEApi.add_creative()`
+- Added ``CAKEApi.add_contact()``
+- Added ``CAKEApi.edit_caps()``
+- Added ``CAKEApi.edit_creative``
+- All ``CAKEApi`` methods now allow passing of additional keyword arguments (but they are ignored)
+- Renamed ``secure`` argument to ``use_https`` when initializing a ``CAKEApi`` object
+- Changed all error messaging to use the generic ``Exception`` type
+
 
 Python
 ------
@@ -26,7 +32,7 @@ Use
     >>> from pycake.api import CAKEApi
     >>> ckapi = CAKEApi(
             admin_domain='some.domain', api_key='sfhgjhGjhgJHg',
-            secure=False, json_response=True)
+            use_https=False, json_response=True)
     >>> advertiser_info = ckapi.get(item='Advertisers')
     >>> offer_info = ckapi.export_offers()
    
@@ -73,6 +79,7 @@ Supported `CAKEApi()` Methods
 - ``add_buyer()``
 - ``add_buyer_contract()``
 - ``add_campaign()``
+- ``add_contact()``
 - ``add_creative()``
 - ``add_creative_files()``
 - ``add_offer()``
@@ -81,6 +88,8 @@ Supported `CAKEApi()` Methods
 - ``edit_buyer()``
 - ``edit_buyer_contract()``
 - ``edit_campaign()``
+- ``edit_caps()``
+- ``edit_creative()``
 - ``edit_creative_files()``
 - ``edit_offer()``
 - ``remove_blacklist()``

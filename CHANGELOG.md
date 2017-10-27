@@ -1,5 +1,15 @@
 # pycake Changelog
 
+### v1.9.0
+- October 27, 2017
+- Added `CAKEApi.add_contact()`
+- Added `CAKEApi.edit_caps()`
+- Added `CAKEApi.edit_creative()`
+- All `CAKEApi` methods now allow passing of additional keyword arguments (but they are ignored)
+- Renamed `secure` argument to `use_https` when initializing a `CAKEApi` object
+- Changed all error messaging to use the generic `Exception` type
+
+
 ### v1.8.0
 - October 19, 2017
 - Added `CAKEApi.add_creative()`

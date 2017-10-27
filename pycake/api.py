@@ -7,20 +7,20 @@ from functools import wraps
 
 class CAKEApi(object):
     def __init__(
-            self, admin_domain=None, api_key=None, secure=True,
+            self, admin_domain=None, api_key=None, use_https=True,
             json_response=False):
 
         if admin_domain is None:
-            raise TypeError('Missing Argument: admin_domain')
+            raise Exception('Missing argument: admin_domain')
         self.admin_domain = admin_domain
         self.api_key = api_key
-        self.protocol = 'https' if secure else 'http'
+        self.protocol = 'https' if use_https else 'http'
         self.json_response = json_response
 
 
     def __api_call(self, url, params, force_json=False):
         if self.api_key is None:
-            raise TypeError('No API key has been set. You must initialize a '
+            raise Exception('No API key has been set. You must initialize a '
                 'CAKEApi object with an api_key or use the set_api_key() '
                 'method on an existing CAKEApi object')
         elif self.json_response or force_json:
@@ -47,7 +47,7 @@ class CAKEApi(object):
             def wrapper(*args, **kwargs):
                 for item in required_list:
                     if item not in kwargs:
-                        raise TypeError('Missing argument: {}'.format(item))
+                        raise Exception('Missing argument: {}'.format(item))
                 else:
                     return f(*args, **kwargs)
             return wrapper
@@ -59,7 +59,7 @@ class CAKEApi(object):
             @wraps(f)
             def wrapper(*args, **kwargs):
                 if not any(i in kwargs for i in param_list):
-                    raise TypeError('Please provide one of the following: '
+                    raise Exception('Please provide one of the following: '
                         '{}'. format(', '.join(param_list)))
                 else:
                     return f(*args, **kwargs)
@@ -74,7 +74,7 @@ class CAKEApi(object):
                 for param in param_list:
                     if (param in kwargs and not
                             all(param in kwargs for param in param_list)):
-                        raise TypeError('If providing one of the following '
+                        raise Exception('If providing one of the following '
                             'please provide all: {}'.format(
                             ', '.join(param_list)))
                 else:
@@ -84,8 +84,7 @@ class CAKEApi(object):
 
 
     @__required_params(['username', 'password'])
-    def set_api_key(self, username=None, password=None):
-        
+    def set_api_key(self, username=None, password=None, **kwargs):
         api_url = '{}://{}/api/1/get.asmx/GetAPIKey'.format(self.protocol,
             self.admin_domain)
         
@@ -111,7 +110,7 @@ class CAKEApi(object):
         ['billing_period_start_date', 'billing_period_end_date'])
     def export_advertiser_bills(
             self, billing_period_start_date, 
-            billing_period_end_date, billing_cycle='all'):
+            billing_period_end_date, billing_cycle='all', **kwargs):
 
         api_url = ('{}://{}/api/1/accounting.asmx/ExportAdvertiserBills'
             .format(self.protocol, self.admin_domain))
@@ -130,7 +129,8 @@ class CAKEApi(object):
         ['billing_period_start_date', 'billing_period_end_date'])
     def export_affiliate_bills(
             self, billing_period_start_date, billing_period_end_date,
-            billing_cycle='all', paid_only='FALSE', payment_type_id='0'):
+            billing_cycle='all', paid_only='FALSE', payment_type_id='0',
+            **kwargs):
         
         api_url = ('{}://{}/api/1/accounting.asmx/ExportAffiliateBills'
             .format(self.protocol, self.admin_domain))
@@ -156,7 +156,8 @@ class CAKEApi(object):
             online_signup='FALSE', signup_ip_address='', website='',
             billing_cycle_id='3', account_manager_id='0', address_street='',
             address_street2='', address_city='', address_state='',
-            address_zip_code='', address_country='', notes='', tags=''):
+            address_zip_code='', address_country='', notes='', tags='',
+            **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/Advertiser'.format(
             self.protocol, self.admin_domain)
@@ -200,7 +201,7 @@ class CAKEApi(object):
             pixel_html='', postback_url='', postback_delay_ms='-1',
             fire_global_pixel='TRUE', date_added='', online_signup='FALSE',
             signup_ip_address='', referral_affiliate_id='0', referral_notes='',
-            terms_and_conditions_agreed='TRUE', notes=''):
+            terms_and_conditions_agreed='TRUE', notes='', **kwargs):
                 
         api_url = '{}://{}/api/2/addedit.asmx/Affiliate'.format(
             self.protocol, self.admin_domain)
@@ -261,7 +262,8 @@ class CAKEApi(object):
     @__must_have_one(['advertiser_id', 'offer_id'])
     def add_blacklist(
             self, affiliate_id, blacklist_reason_id, redirect_type, sub_id='',
-            advertiser_id='0', offer_id='0', blacklist_date=datetime.now()):
+            advertiser_id='0', offer_id='0', blacklist_date=datetime.now(),
+            **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/Blacklist'.format(
             self.protocol, self.admin_domain)
@@ -288,7 +290,7 @@ class CAKEApi(object):
             address_street='', address_street2='', address_city='',
             address_state='', address_zip_code='', address_country='',
             website='', billing_cycle_id='3', credit_type='unlimited',
-            credit_limit='-1'):
+            credit_limit='-1', **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/Buyer'.format(self.protocol,
             self.admin_domain)
@@ -322,7 +324,7 @@ class CAKEApi(object):
             max_lead_age_minutes='7200', posting_wait_seconds='0',
             default_confirmation_page_link='', max_post_errors='10',
             send_alert_only='off', rank='0', email_template_id='0',
-            portal_template_id='0'):
+            portal_template_id='0', **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/BuyerContract'.format(
             self.protocol, self.admin_domain)
@@ -353,6 +355,46 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+    @__required_params(
+        ['entity_type', 'entity_id', 'role_id', 'contact_email_address',
+            'contact_first_name'])
+    def add_contact(
+            self, entity_type, entity_id, role_id, contact_email_address,
+            contact_first_name, include_in_mass_emails='on',
+            contact_middle_name='', contact_last_name='', contact_title='',
+            contact_department_id='-1', contact_phone_work='',
+            contact_phone_cell='', contact_phone_fax='',
+            contact_im_service='', contact_im_name='', contact_timezone='',
+            contact_language_id='-1', **kwargs):
+
+        api_url = '{}://{}/api/3/addedit.asmx/Contact'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['entity_type'] = entity_type
+        parameters['entity_id'] = entity_id
+        parameters['contact_id'] = 0
+        parameters['role_id'] = role_id
+        parameters['include_in_mass_emails'] = include_in_mass_emails
+        parameters['contact_first_name'] = contact_first_name
+        parameters['contact_middle_name'] = contact_middle_name
+        parameters['contact_last_name'] = contact_last_name
+        parameters['contact_email_address'] = contact_email_address
+        parameters['contact_password'] = ''
+        parameters['contact_title'] = contact_title
+        parameters['contact_department_id'] = contact_department_id
+        parameters['contact_phone_work'] = contact_phone_work
+        parameters['contact_phone_cell'] = contact_phone_cell
+        parameters['contact_phone_fax'] = contact_phone_fax
+        parameters['contact_im_service'] = contact_im_service
+        parameters['contact_im_name'] = contact_im_name
+        parameters['contact_timezone'] = contact_timezone
+        parameters['contact_language_id'] = contact_language_id
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
     @__required_params(['affiliate_id', 'media_type_id', 'payout'])
     @__must_have_one(['offer_id', 'offer_contract_id'])
     def add_campaign(
@@ -365,25 +407,25 @@ class CAKEApi(object):
             redirect_404='off', clear_session_on_conversion='off',
             postback_url='', postback_delay_ms='-1',
             unique_key_hash_type='none', pixel_html='', test_link='',
-            redirect_domain=''):
+            redirect_domain='', **kwargs):
 
         if (not str(affiliate_id).isdigit() or int(affiliate_id) < 1 or 
                 int(affiliate_id) > 999999999):
-            raise ValueError(('affiliate_id must be an integer between 1 '
+            raise Exception(('affiliate_id must be an integer between 1 '
                 'and 999999999'))
         if (not offer_id is None and not str(offer_id).isdigit() or
             int(offer_id) < 1 or int(offer_id) > 999999999):
-            raise ValueError(('offer_id must be an integer between 1 and '
+            raise Exception(('offer_id must be an integer between 1 and '
                 '999999999'))
         if (not offer_contract_id is None and
             not str(offer_contract_id).isdigit()):
-            raise ValueError(('offer_contract_id must be an integer between '
+            raise Exception(('offer_contract_id must be an integer between '
                 '1 and 999999999'))
         if media_type_id is None:
-            raise TypeError(("Missing Argument: media_type_id. Use "
+            raise Exception(("Missing argument: media_type_id. Use "
                 "get(item='MediaTypes') for available IDs"))
         if not str(media_type_id).isdigit() or int(media_type_id) < 1:
-            raise ValueError(("media_type_id must be an integer greater than "
+            raise Exception(("media_type_id must be an integer greater than "
                 "0. Use get(item='MediaTypes') for available IDs"))
         
         api_url = '{}://{}/api/3/addedit.asmx/Campaign'.format(self.protocol,
@@ -434,7 +476,8 @@ class CAKEApi(object):
     def add_creative(
             self, creative_name, offer_id, creative_type_id,
             third_party_name='', creative_status_id='1', width='-1',
-            height='-1', offer_link='', allow_link_override='FALSE', notes=''):
+            height='-1', offer_link='', allow_link_override='FALSE', notes='',
+            **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/Creative'.format(
             self.protocol, self.admin_domain)
@@ -459,7 +502,7 @@ class CAKEApi(object):
     @__required_params(['creative_id', 'creative_file_import_url'])
     def add_creative_files(
             self, creative_id, creative_file_import_url,
-            is_preview_file='FALSE', replace_all_files='FALSE'):
+            is_preview_file='FALSE', replace_all_files='FALSE', **kwargs):
         
         api_url = '{}://{}/api/1/addedit.asmx/CreativeFiles'.format(
             self.protocol, self.admin_domain)
@@ -510,7 +553,7 @@ class CAKEApi(object):
             allow_affiliates_to_create_creatives='off', unsubscribe_link='',
             from_lines='', subject_lines='',
             allowed_media_type_modification_type='do_not_change',
-            allowed_media_type_ids=''):
+            allowed_media_type_ids='', **kwargs):
         
         api_url = '{}://{}/api/5/addedit.asmx/Offer'.format(
             self.protocol, self.admin_domain)
@@ -603,7 +646,7 @@ class CAKEApi(object):
             account_status_id='0', website='', billing_cycle_id='0',
             account_manager_id='0', address_street='', address_street2='',
             address_city='', address_state='', address_zip_code='',
-            address_country='', notes='', tags=''):
+            address_country='', notes='', tags='', **kwargs):
 
         advertiser_export = self.export_advertisers(
             advertiser_id=advertiser_id, force_json=True)
@@ -656,7 +699,7 @@ class CAKEApi(object):
             vertical_category_ids='', country_codes='', tags='',
             pixel_html='', postback_url='', postback_delay_ms='-1',
             fire_global_pixel='', referral_affiliate_id='0',
-            referral_notes='', notes=''):
+            referral_notes='', notes='', **kwargs):
         
         affiliate_export = self.export_affiliates(
             affiliate_id=affiliate_id, force_json=True)
@@ -746,13 +789,13 @@ class CAKEApi(object):
     #     self, blacklist_id=None, affiliate_id='0', sub_id='',
     #     advertiser_id='0', offer_id='0', blacklist_reason_id='0',
     #     redirect_type=None, blacklist_date='2067-10-20 13:31:59.7',
-    #     blacklist_date_modification_type='do_not_change'):
+    #     blacklist_date_modification_type='do_not_change', **kwargs):
 
     #     blacklist_export = self.export_blacklists(
     #         affiliate_id=affiliate_id, force_json=True)
     #     export_response = json.loads(blacklist_export)
     #     if export_response['d']['row_count'] == 0:
-    #         raise ValueError('Invalid blacklist_id')
+    #         raise Exception('Invalid blacklist_id')
     #     current_affiliate_id = (export_response['d']['blacklists'][0]
     #         ['affiliate']['affiliate_id'])
     #     current_advertiser_id = (export_response['d']['blacklists'][0]
@@ -799,7 +842,7 @@ class CAKEApi(object):
             account_manager_id='0', address_street='', address_street2='',
             address_city='', address_state='', address_zip_code='',
             address_country='', website='', billing_cycle_id='0',
-            credit_type='no_change', credit_limit='-1'):
+            credit_type='no_change', credit_limit='-1', **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/Buyer'.format(self.protocol,
             self.admin_domain)
@@ -833,7 +876,7 @@ class CAKEApi(object):
             min_lead_age_minutes='-1', max_lead_age_minutes='-1',
             posting_wait_seconds='-1', default_confirmation_page_link='',
             max_post_errors='-1', send_alert_only='no_change', rank='-1',
-            email_template_id='0', portal_template_id='0'):
+            email_template_id='0', portal_template_id='0', **kwargs):
 
         api_url = '{}://{}/api/1/addedit.asmx/BuyerContract'.format(
             self.protocol, self.admin_domain)
@@ -876,11 +919,11 @@ class CAKEApi(object):
             redirect_offer_contract_id='0', redirect_404='no_change',
             clear_session_on_conversion='no_change', postback_url='',
             postback_delay_ms='-1', unique_key_hash_type='', pixel_html='',
-            test_link='', redirect_domain=''):
+            test_link='', redirect_domain='', **kwargs):
 
         if (not str(campaign_id).isdigit() or int(campaign_id) < 1 or
             int(campaign_id) > 999999999):
-            raise ValueError(('campaign_id must be an integer between 1 and '
+            raise Exception(('campaign_id must be an integer between 1 and '
                 '999999999'))
 
         campaign_export = self.export_campaigns(
@@ -943,11 +986,69 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
+    # def edit_campaign_exceptions(
+    #         self, **kwargs):
+
+    #     api_url = 
+
+
+    @__required_params(
+        ['cap_type_id', 'cap_interval_id', 'cap_amount', 'send_alert_only'])
+    @__must_have_one(['offer_id', 'offer_contract_id', 'campaign_id'])
+    def edit_caps(
+            self, cap_type_id, cap_interval_id, cap_amount, send_alert_only,
+            offer_id='0', offer_contract_id='0', campaign_id='0', 
+            cap_start='', **kwargs):
+
+        api_url = '{}://{}/api/1/addedit.asmx/Caps'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['offer_id'] = offer_id
+        parameters['offer_contract_id'] = offer_contract_id
+        parameters['campaign_id'] = campaign_id
+        parameters['cap_type_id'] = cap_type_id
+        parameters['cap_interval_id'] = cap_interval_id
+        parameters['cap_amount'] = cap_amount
+        parameters['cap_start'] = ('2067-10-20 13:31:59.7' if
+            cap_start == '' else str(cap_start))
+        parameters['send_alert_only'] = send_alert_only
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
+    @__required_params(['creative_id', 'allow_link_override'])
+    def edit_creative(
+            self, creative_id, allow_link_override, creative_name='',
+            third_party_name='', creative_type_id='0', creative_status_id='0',
+            width='-2', height='-2', offer_link='', notes='', **kwargs):
+
+        api_url = '{}://{}/api/1/addedit.asmx/Creative'.format(
+            self.protocol, self.admin_domain)
+        
+        parameters = OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['creative_id'] = creative_id
+        parameters['offer_id'] = 0
+        parameters['creative_name'] = creative_name
+        parameters['third_party_name'] = third_party_name
+        parameters['creative_type_id'] = creative_type_id
+        parameters['creative_status_id'] = creative_status_id
+        parameters['width'] = width
+        parameters['height'] = height
+        parameters['offer_link'] = offer_link
+        parameters['allow_link_override'] = allow_link_override
+        parameters['notes'] = notes
+
+        return self.__api_call(url=api_url, params=parameters)
+
+
     @__required_params(
         ['creative_id', 'creative_file_id', 'creative_file_import_url'])
     def edit_creative_files(
             self, creative_id, creative_file_id, creative_file_import_url,
-            is_preview_file='FALSE', replace_all_files='FALSE'):
+            is_preview_file='FALSE', replace_all_files='FALSE', **kwargs):
         
         api_url = '{}://{}/api/1/addedit.asmx/CreativeFiles'.format(
             self.protocol, self.admin_domain)
@@ -997,7 +1098,7 @@ class CAKEApi(object):
             allow_affiliates_to_create_creatives='no_change',
             unsubscribe_link='', from_lines='', subject_lines='',
             allowed_media_type_modification_type='do_not_change',
-            allowed_media_type_ids=''):
+            allowed_media_type_ids='', **kwargs):
         
         api_url = '{}://{}/api/5/addedit.asmx/Offer'.format(self.protocol,
             self.admin_domain)
@@ -1088,8 +1189,7 @@ class CAKEApi(object):
 
 
     @__required_params(['blacklist_id'])
-    def remove_blacklist(self, blacklist_id):
-
+    def remove_blacklist(self, blacklist_id, **kwargs):
         api_url = '{}://{}/api/1/addedit.asmx/RemoveBlacklist'.format(
             self.protocol, self.admin_domain)
 
@@ -1176,7 +1276,7 @@ class CAKEApi(object):
 
     def export_buyer_contracts(
             self, buyer_contract_id='0', buyer_id='0',
-            vertical_id='0', buyer_contract_status_id='0'):
+            vertical_id='0', buyer_contract_status_id='0', **kwargs):
 
         api_url = '{}://{}/api/4/export.asmx/BuyerContracts'.format(
             self.protocol, self.admin_domain)
@@ -1191,8 +1291,7 @@ class CAKEApi(object):
         return self.__api_call(url=api_url, params=parameters)
 
 
-    def export_buyers(self, buyer_id='0', account_status_id='0'):
-
+    def export_buyers(self, buyer_id='0', account_status_id='0', **kwargs):
         api_url = '{}://{}/api/2/export.asmx/Buyers'.format(self.protocol,
             self.admin_domain)
 
@@ -1236,7 +1335,8 @@ class CAKEApi(object):
     def export_creatives(
             self, offer_id, creative_id='0', creative_name='',
             creative_type_id='0', creative_status_id='0', start_at_row='0',
-            row_limit='0', sort_field='creative_id', sort_descending='FALSE'):
+            row_limit='0', sort_field='creative_id', sort_descending='FALSE',
+            **kwargs):
 
         api_url = '{}://{}/api/3/export.asmx/Creatives'.format(self.protocol,
             self.admin_domain)
@@ -1260,7 +1360,7 @@ class CAKEApi(object):
             self, offer_id='0', offer_name='', advertiser_id='0',
             vertical_id='0', offer_type_id='0', media_type_id='0',
             offer_status_id='0', tag_id='0', start_at_row='0', row_limit='0',
-            sort_field='offer_id', sort_descending='FALSE'):
+            sort_field='offer_id', sort_descending='FALSE', **kwargs):
 
         api_url = '{}://{}/api/6/export.asmx/Offers'.format(self.protocol,
             self.admin_domain)
@@ -1287,7 +1387,7 @@ class CAKEApi(object):
     def export_pixel_log_requests(
             self, start_date, end_date, advertiser_id='0', offer_id='0', 
             converted_only='FALSE', start_at_row='0', row_limit='0',
-            sort_descending='FALSE'):
+            sort_descending='FALSE', **kwargs):
 
         api_url = '{}://{}/api/1/export.asmx/PixelLogRequests'.format(
             self.protocol, self.admin_domain)
@@ -1307,8 +1407,7 @@ class CAKEApi(object):
 
 
     @__required_params(['rule_id'])
-    def export_rule_targets(self, rule_id):
-
+    def export_rule_targets(self, rule_id, **kwargs):
         api_url = '{}://{}/api/3/export.asmx/RuleTargets'.format(
             self.protocol, self.admin_domain) 
 
@@ -1322,7 +1421,8 @@ class CAKEApi(object):
     @__required_params(['start_date', 'end_date'])
     def export_schedules(
             self, start_date, end_date, buyer_id='0', status_id='0',
-            vertical_id='0', priority_only='FALSE', active_only='FALSE'):
+            vertical_id='0', priority_only='FALSE', active_only='FALSE',
+            **kwargs):
 
         api_url = '{}://{}/api/2/export.asmx/Schedules'.format(
             self.protocol, self.admin_domain) 
@@ -1345,7 +1445,7 @@ class CAKEApi(object):
 
     def get(self, item=None, **kwargs):
         if item is None:
-            raise TypeError(('Missing argument: item. For a list of valid '
+            raise Exception(('Missing argument: item. For a list of valid '
                 'items please see http://{}/api/1/get.asmx'
                 .format(self.admin_domain)))
         elif item not in [
@@ -1360,7 +1460,7 @@ class CAKEApi(object):
                 'PriceFormats', 'ResponseDispositions', 'Roles',
                 'ScheduleTypes', 'SessionRegenerationTypes', 'SharedRules',
                 'TrackingDomains', 'Verticals']:
-            raise ValueError(('Invalid item: {}. For a list of valid items '
+            raise Exception(('Invalid item: {}. For a list of valid items '
                 'please see http://{}/api/1/get.asmx'.format(item,
                     self.admin_domain)))
             
@@ -1380,7 +1480,7 @@ class CAKEApi(object):
     def brand_advertiser_summary(
             self, start_date, end_date, brand_advertiser_id='0',
             brand_advertiser_manager_id='0', brand_advertiser_tag_id='0',
-            event_id='0', event_type='all'):
+            event_id='0', event_type='all', **kwargs):
 
         api_url = '{}://{}/api/3/reports.asmx/BrandAdvertiserSummary'.format(
             self.protocol, self.admin_domain)
@@ -1405,7 +1505,7 @@ class CAKEApi(object):
             source_affiliate_id='0', subid_id='', site_offer_id='0',
             source_affiliate_tag_id='0', site_offer_tag_id='0',
             source_affiliate_manager_id='0', brand_advertiser_manager_id='0',
-            event_id='0', event_type='all'):
+            event_id='0', event_type='all', **kwargs):
 
         api_url = '{}://{}/api/5/reports.asmx/CampaignSummary'.format(
             self.protocol, self.admin_domain)
@@ -1433,7 +1533,7 @@ class CAKEApi(object):
             self, start_date, end_date, affiliate_id='0', advertiser_id='0',
             offer_id='0', campaign_id='0', creative_id='0',
             price_format_id='0', include_duplicates='FALSE',
-            include_tests='FALSE', start_at_row='0', row_limit='0'):
+            include_tests='FALSE', start_at_row='0', row_limit='0', **kwargs):
 
         api_url = '{}://{}/api/12/reports.asmx/Clicks'.format(
             self.protocol, self.admin_domain)
@@ -1462,7 +1562,7 @@ class CAKEApi(object):
             affiliate_id='0', advertiser_id='0', offer_id='0',
             campaign_id='0', creative_id='0', include_tests='FALSE',
             start_at_row='0', row_limit='0', sort_field='conversion_id',
-            sort_descending='FALSE'):
+            sort_descending='FALSE', **kwargs):
 
         api_url = '{}://{}/api/10/reports.asmx/ConversionChanges'.format(
             self.protocol, self.admin_domain)
@@ -1497,7 +1597,8 @@ class CAKEApi(object):
             disposition_id='0', source_affiliate_billing_status='all',
             brand_advertiser_billing_status='all', test_filter='non_tests',
             start_at_row='0', row_limit='0',
-            sort_field='event_conversion_date', sort_descending='FALSE'):
+            sort_field='event_conversion_date', sort_descending='FALSE',
+            **kwargs):
 
         api_url = '{}://{}/api/17/reports.asmx/EventConversions'.format(
             self.protocol, self.admin_domain)
@@ -1541,7 +1642,7 @@ class CAKEApi(object):
     def country_summary(
             self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
             advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
 
         api_url = '{}://{}/api/1/reports.asmx/CountrySummary'.format(
             self.protocol, self.admin_domain)
@@ -1565,7 +1666,7 @@ class CAKEApi(object):
     @__must_have_one(['site_offer_id', 'campaign_id'])
     def creative_summary(
             self, start_date, end_date, site_offer_id='0', campaign_id='0',
-            event_id='0', event_type='all'):
+            event_id='0', event_type='all', **kwargs):
 
         api_url = '{}://{}/api/3/reports.asmx/CreativeSummary'.format(
             self.protocol, self.admin_domain)
@@ -1589,7 +1690,7 @@ class CAKEApi(object):
             self, start_date, end_date, source_affiliate_id='0',
             brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
             campaign_id='0', creative_id='0', account_manager_id='0',
-            include_tests='FALSE'):
+            include_tests='FALSE', **kwargs):
 
         api_url = '{}://{}/api/2/reports.asmx/DailySummaryExport'.format(
             self.protocol, self.admin_domain)
@@ -1615,7 +1716,7 @@ class CAKEApi(object):
             self, start_date, end_date, vertical_id='0', buyer_id='0',
             buyer_contract_id='0', status_id='0', sub_status_id='0',
             start_at_row='0', row_limit='0', sort_field='transaction_date',
-            sort_descending='FALSE'):
+            sort_descending='FALSE', **kwargs):
 
         api_url = '{}://{}/api/4/reports.asmx/LeadsByBuyer'.format(
             self.protocol, self.admin_domain)
@@ -1639,7 +1740,8 @@ class CAKEApi(object):
 
     @__required_params(['start_date', 'end_date'])
     def leads_by_affiliate(
-            self, start_date, end_date, affiliate_id='0', contact_id='0'):
+            self, start_date, end_date, affiliate_id='0', contact_id='0',
+            **kwargs):
 
         api_url = '{}://{}/api/1/reports.asmx/LeadsByAffiliateExport'.format(
             self.protocol, self.admin_domain) 
@@ -1658,7 +1760,7 @@ class CAKEApi(object):
     def lite_clicks_advertiser_summary(
             self, start_date, end_date, advertiser_id='0',
             advertiser_manager_id='0', advertiser_tag_id='0', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
 
         api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/AdvertiserSummary'
             .format(self.protocol, self.admin_domain))
@@ -1680,7 +1782,7 @@ class CAKEApi(object):
     def lite_clicks_affiliate_summary(
             self, start_date, end_date, affiliate_id='0',
             affiliate_manager_id='0', affiliate_tag_id='0', offer_tag_id='0',
-            event_id='0', revenue_filter='conversions_and_events'):
+            event_id='0', revenue_filter='conversions_and_events', **kwargs):
 
         api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/AffiliateSummary'
             .format(self.protocol, self.admin_domain))
@@ -1704,7 +1806,7 @@ class CAKEApi(object):
             self, start_date, end_date, affiliate_id='0', subaffiliate_id='',
             affiliate_tag_id='0', offer_id='0', offer_tag_id='0',
             campaign_id='0', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
         
         api_url = ('{}://{}/api/2/reports_lite_clicks.asmx/CampaignSummary'
             .format(self.protocol, self.admin_domain))
@@ -1730,7 +1832,7 @@ class CAKEApi(object):
     def lite_clicks_country_summary(
             self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
             advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
 
         api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/CountrySummary'
             .format(self.protocol, self.admin_domain))
@@ -1754,7 +1856,7 @@ class CAKEApi(object):
     def lite_clicks_daily_summary(
             self, start_date, end_date, affiliate_id='0', advertiser_id='0',
             offer_id='0', vertical_id='0', campaign_id='0', creative_id='0',
-            account_manager_id='0', include_tests='FALSE'):
+            account_manager_id='0', include_tests='FALSE', **kwargs):
 
         api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/DailySummaryExport'
             .format(self.protocol, self.admin_domain))
@@ -1780,7 +1882,7 @@ class CAKEApi(object):
             self, start_date, end_date, advertiser_id='0',
             advertiser_manager_id='0', offer_id='0', offer_tag_id='0',
             affiliate_tag_id='0', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
 
         api_url = ('{}://{}/api/1/reports_lite_clicks.asmx/OfferSummary'
             .format(self.protocol, self.admin_domain))
@@ -1804,7 +1906,7 @@ class CAKEApi(object):
     def lite_clicks_sub_id_summary(
             self, start_date, end_date, source_affiliate_id, site_offer_id='0',
             campaign_id='0', sub_id='NULL', event_id='0',
-            revenue_filter='conversions_and_events'):
+            revenue_filter='conversions_and_events', **kwargs):
 
         api_url = ('{}://{}/api/2/reports_lite_clicks.asmx/SubIDSummary'
             .format(self.protocol, self.admin_domain))
@@ -1824,8 +1926,7 @@ class CAKEApi(object):
 
 
     @__required_params(['start_date', 'end_date'])
-    def login_export(self, start_date, end_date, role_id='0'):
-
+    def login_export(self, start_date, end_date, role_id='0', **kwargs):
         api_url = '{}://{}/api/1/reports.asmx/LoginExport'.format(
             self.protocol, self.admin_domain)
 
@@ -1842,7 +1943,7 @@ class CAKEApi(object):
     def order_details(
             self, start_date, end_date, affiliate_id='0', conversion_id='0',
             order_id='', start_at_row='0', row_limit='0',
-            sort_field='order_id', sort_descending='FALSE'):
+            sort_field='order_id', sort_descending='FALSE', **kwargs):
 
         api_url = '{}://{}/api/1/reports.asmx/OrderDetails'.format(
             self.protocol, self.admin_domain)
@@ -1867,7 +1968,7 @@ class CAKEApi(object):
             self, start_date, end_date, brand_advertiser_id='0',
             brand_advertiser_manager_id='0', site_offer_id='0',
             site_offer_tag_id='0', source_affiliate_tag_id='0', event_id='0',
-            event_type='all'):
+            event_type='all', **kwargs):
 
         api_url = '{}://{}/api/4/reports.asmx/SiteOfferSummary'.format(
             self.protocol, self.admin_domain)
@@ -1892,7 +1993,7 @@ class CAKEApi(object):
     def source_affiliate_summary(
             self, start_date, end_date, source_affiliate_id='0',
             source_affiliate_manager_id='0', source_affiliate_tag_id='0',
-            site_offer_tag_id='0', event_id='0', event_type='all'):
+            site_offer_tag_id='0', event_id='0', event_type='all', **kwargs):
 
         api_url = '{}://{}/api/3/reports.asmx/SourceAffiliateSummary'.format(
             self.protocol, self.admin_domain)
@@ -1915,7 +2016,7 @@ class CAKEApi(object):
     @__required_params(['start_date', 'end_date', 'source_affiliate_id'])
     def sub_id_summary(
             self, start_date, end_date, source_affiliate_id, site_offer_id='0',
-            event_id='0', revenue_filter='conversions_and_events'):
+            event_id='0', revenue_filter='conversions_and_events', **kwargs):
 
         api_url = '{}://{}/api/1/reports.asmx/SubIDSummary'.format(
             self.protocol, self.admin_domain)
@@ -1934,8 +2035,7 @@ class CAKEApi(object):
 
 
     @__required_params(['start_date', 'end_date'])
-    def traffic_export(self, start_date, end_date):
-
+    def traffic_export(self, start_date, end_date, **kwargs):
         api_url = '{}://{}/api/1/reports.asmx/TrafficExport'.format(
             self.protocol, self.admin_domain)
 
@@ -1961,11 +2061,11 @@ class CAKEApi(object):
             disposition_type='no_change', disposition_id='0',
             update_revshare_payout='FALSE',
             effective_date_option='conversion_date', custom_date='',
-            note_to_append='', disallow_on_billing_status='ignore'):
+            note_to_append='', disallow_on_billing_status='ignore', **kwargs):
 
         if (effective_date_option == 'custom' and
                 custom_date == ''):
-            raise TypeError('Missing argument: custom_date')
+            raise Exception('Missing argument: custom_date')
 
         api_url = '{}://{}/api/4/track.asmx/UpdateConversion'.format(
             self.protocol, self.admin_domain) 
@@ -2000,7 +2100,7 @@ class CAKEApi(object):
             self, affiliate_id, affiliate_api_key, campaign_name='',
             media_type_category_id='0', vertical_category_id='0',
             vertical_id='0', offer_status_id='0', tag_id='0', start_at_row='0',
-            row_limit='0'):
+            row_limit='0', **kwargs):
 
         api_url = '{}://{}/affiliates/api/4/offers.asmx/OfferFeed'.format(
             self.protocol, self.admin_domain) 
