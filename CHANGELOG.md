@@ -1,5 +1,17 @@
 # pycake Changelog
 
+### v1.10.0
+- November 9, 2017
+- Better README including all functions documented below
+- Added `CAKEApi.signup_advertiser()` function
+- Added `CAKEApi.signup_affiliate()` function
+- Added `CAKEApi.add_campaign_creative_exception()` function
+- Added `CAKEApi.add_campaign_subid_exception()` function
+- Added `CAKEApi.remove_campaign_creative_exception()` function
+- Added `CAKEApi.remove_campaign_subid_exception()` function
+- Fixed bug in ``CAKEApi.edit_affiliate()``. Some fields' default values were not skip values.
+- Removed ``CAKEApi.edit_creative_files()``. While investigating a bug in this function I found a bug in the CAKE API that needs to be resolved before this fucntion can work properly. 
+
 ### v1.9.0
 - October 27, 2017
 - Added `CAKEApi.add_contact()`
