@@ -15,19 +15,11 @@ For example, if you want to edit one setting on one offer (ADDEDIT Offer), you c
     >>> offer_edit_response = ckapi.edit_offer(offer_id=4, click_cookie_days=60)
 
 
-In short, if settings or filters are not explicitly called out when using a ``CAKEApi`` funtion, they are automatically skipped or all results returned (depending on the underlying API method type).
+In short, if settings or filters are not explicitly called out when using a CAKEApi funtion, they are automatically skipped or all results returned (depending on the underlying API method type).
 
-New in 1.10.0
+New in 1.11.0
 -------------
-- Better README including all functions documented below
-- Added ``CAKEApi.signup_advertiser()`` function
-- Added ``CAKEApi.signup_affiliate()`` function
-- Added ``CAKEApi.add_campaign_creative_exception()`` function
-- Added ``CAKEApi.add_campaign_subid_exception()`` function
-- Added ``CAKEApi.remove_campaign_creative_exception()`` function
-- Added ``CAKEApi.remove_campaign_subid_exception()`` function
-- Fixed bug in ``CAKEApi.edit_affiliate()``. Some fields' default values were not skip values.
-- Removed ``CAKEApi.edit_creative_files()``. While investigating a bug in this function I found a bug in the CAKE API that needs to be resolved before this fucntion can work properly. 
+- When ``CAKEApi.json_response=True``, functions will return a json object instead of a string
 
 
 Python

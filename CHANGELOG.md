@@ -1,5 +1,9 @@
 # pycake Changelog
 
+###v1.11.0
+- November 29, 2017
+- When ``CAKEApi.json_response=True``, functions will return a json object instead of a string
+
 ### v1.10.0
 - November 9, 2017
 - Better README including all functions documented below

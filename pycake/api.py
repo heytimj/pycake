@@ -23,35 +23,21 @@ class CAKEApi(object):
             raise Exception('No API key has been set. You must initialize a '
                 'CAKEApi object with an api_key or use the set_api_key() '
                 'function on an existing CAKEApi object')
-        elif self.json_response or force_json:
+        elif self.json_response == True or force_json:
             request = _requests.post(url, json=params, stream=True)
             raw_response = request.text
-            json_response = _json.loads(raw_response)
             try:
-                _ = json_response['d']
-                return raw_response
+                json_response = _json.loads(raw_response)
+                json_data = json_response['d']
+                return json_data
             except:
                 request = _requests.post(url, data=params, stream=True)
                 raw_response = request.text
-                return raw_response
-            
+                return raw_response  
         else:
             request = _requests.post(url, data=params, stream=True)
             response = request.text
             return response
-
-
-    def _required_params(param_list):
-        def actual_decorator(f):
-            @_wraps(f)
-            def wrapper(*args, **kwargs):
-                for item in param_list:
-                    if item not in kwargs:
-                        raise Exception('Missing argument: {}'.format(item))
-                else:
-                    return f(*args, **kwargs)
-            return wrapper
-        return actual_decorator
 
 
     def _must_have_one(param_list):
@@ -99,7 +85,6 @@ class CAKEApi(object):
             raise Exception('Invalid campaign ID')
         
 
-    @_required_params(['username', 'password'])
     def set_api_key(self, username, password, **kwargs):
         api_url = '{}://{}/api/1/get.asmx/GetAPIKey'.format(self.protocol,
             self.admin_domain)
@@ -118,12 +103,8 @@ class CAKEApi(object):
         except:
             self.api_key = None
 
-
 #-----------------------------ACCOUNTING------------------------------#
 
-
-    @_required_params(
-        ['billing_period_start_date', 'billing_period_end_date'])
     def export_advertiser_bills(
             self, billing_period_start_date, 
             billing_period_end_date, billing_cycle='all', **kwargs):
@@ -141,8 +122,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['billing_period_start_date', 'billing_period_end_date'])
     def export_affiliate_bills(
             self, billing_period_start_date, billing_period_end_date,
             billing_cycle='all', paid_only='FALSE', payment_type_id='0',
@@ -162,11 +141,8 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #------------------------------ADDEDIT--------------------------------#
 
-
-    @_required_params(['advertiser_name'])
     def add_advertiser(
             self, advertiser_name, third_party_name='', account_status_id='1',
             online_signup='FALSE', signup_ip_address='', website='',
@@ -201,7 +177,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['affiliate_name'])
     def add_affiliate(
             self, affiliate_name, third_party_name='', account_status_id='1',
             inactive_reason_id='0', affiliate_tier_id='0',
@@ -273,8 +248,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['affiliate_id', 'blacklist_reason_id', 'redirect_type'])
     @_must_have_one(['advertiser_id', 'offer_id'])
     def add_blacklist(
             self, affiliate_id, blacklist_reason_id, redirect_type, sub_id='',
@@ -299,7 +272,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['buyer_name', 'account_manager_id'])
     @_if_one_then_all(['credit_type', 'credit_limit'])
     def add_buyer(
             self, buyer_name, account_manager_id, account_status_id='1',
@@ -331,7 +303,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['buyer_id', 'vertical_id', 'buyer_contract_name'])
     def add_buyer_contract(
             self, buyer_id, vertical_id, buyer_contract_name,
             account_status_id='1', offer_id='0', replace_returns='off',
@@ -371,7 +342,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['affiliate_id', 'media_type_id', 'payout'])
     @_must_have_one(['offer_id', 'offer_contract_id'])
     def add_campaign(
             self, affiliate_id, media_type_id, payout, offer_id='0',
@@ -448,8 +418,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['campaign_id', 'creative_id'])
     def add_campaign_creative_exception(
             self, campaign_id, creative_id):
 
@@ -468,7 +436,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['campaign_id', 'sub_id'])
     def add_campaign_subid_exception(
             self, campaign_id, sub_id):
 
@@ -487,9 +454,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['entity_type', 'entity_id', 'role_id', 'contact_email_address',
-            'contact_first_name'])
     def add_contact(
             self, entity_type, entity_id, role_id, contact_email_address,
             contact_first_name, include_in_mass_emails='on',
@@ -527,7 +491,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['creative_name', 'offer_id', 'creative_type_id'])
     def add_creative(
             self, creative_name, offer_id, creative_type_id,
             third_party_name='', creative_status_id='1', width='-1',
@@ -554,7 +517,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['creative_id', 'creative_file_import_url'])
     def add_creative_files(
             self, creative_id, creative_file_import_url,
             is_preview_file='FALSE', replace_all_files='FALSE', **kwargs):
@@ -573,10 +535,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['advertiser_id', 'vertical_id', 'offer_name', 'offer_status_id',
-        'offer_type_id', 'last_touch', 'price_format_id', 'payout',
-        'received', 'offer_link'])
     @_if_one_then_all(['tags', 'tags_modification_type'])
     @_if_one_then_all(
         ['allowed_media_type_ids', 'allowed_media_type_modification_type'])
@@ -695,7 +653,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['advertiser_id'])
     def edit_advertiser(
             self, advertiser_id, advertiser_name='', third_party_name='',
             account_status_id='0', website='', billing_cycle_id='0',
@@ -739,7 +696,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['affiliate_id'])
     def edit_affiliate(
             self, affiliate_id, affiliate_name='', third_party_name='',
             account_status_id='0', inactive_reason_id='0',
@@ -837,7 +793,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['buyer_id'])
     def edit_buyer(
             self, buyer_id, buyer_name='', account_status_id='0',
             account_manager_id='0', address_street='', address_street2='',
@@ -868,7 +823,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['buyer_contract_id'])
     def edit_buyer_contract(
             self, buyer_contract_id, buyer_contract_name='',
             account_status_id='0', offer_id='0', replace_returns='no_change',
@@ -908,7 +862,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['campaign_id'])
     def edit_campaign(
             self, campaign_id, offer_contract_id='0', media_type_id='0',
             third_party_name='', account_status_id='0',
@@ -987,8 +940,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['cap_type_id', 'cap_interval_id', 'cap_amount', 'send_alert_only'])
     @_must_have_one(['offer_id', 'offer_contract_id', 'campaign_id'])
     def edit_caps(
             self, cap_type_id, cap_interval_id, cap_amount, send_alert_only,
@@ -1013,7 +964,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['creative_id', 'allow_link_override'])
     def edit_creative(
             self, creative_id, allow_link_override, creative_name='',
             third_party_name='', creative_type_id='0', creative_status_id='0',
@@ -1079,7 +1029,6 @@ class CAKEApi(object):
     #     return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['offer_id'])
     @_if_one_then_all(['tags', 'tags_modification_type'])
     @_if_one_then_all(
         ['allowed_media_type_ids', 'allowed_media_type_modification_type'])
@@ -1203,7 +1152,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['blacklist_id'])
     def remove_blacklist(self, blacklist_id, **kwargs):
         api_url = '{}://{}/api/1/addedit.asmx/RemoveBlacklist'.format(
             self.protocol, self.admin_domain)
@@ -1215,8 +1163,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(
-        ['campaign_id', 'creative_id'])
     def remove_campaign_creative_exception(
             self, campaign_id, creative_id):
 
@@ -1235,7 +1181,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['campaign_id', 'sub_id'])
     def remove_campaign_subid_exception(
             self, campaign_id, sub_id):
 
@@ -1253,9 +1198,7 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #-------------------------------EXPORT--------------------------------#
-
 
     def export_advertisers(
             self, advertiser_id='0', advertiser_name='',
@@ -1385,7 +1328,6 @@ class CAKEApi(object):
             url=api_url, params=parameters, force_json=force_json)
 
 
-    @_required_params(['offer_id'])
     def export_creatives(
             self, offer_id, creative_id='0', creative_name='',
             creative_type_id='0', creative_status_id='0', start_at_row='0',
@@ -1440,7 +1382,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def export_pixel_log_requests(
             self, start_date, end_date, advertiser_id='0', offer_id='0', 
             converted_only='FALSE', start_at_row='0', row_limit='0',
@@ -1463,7 +1404,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['rule_id'])
     def export_rule_targets(self, rule_id, **kwargs):
         api_url = '{}://{}/api/3/export.asmx/RuleTargets'.format(
             self.protocol, self.admin_domain) 
@@ -1475,7 +1415,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def export_schedules(
             self, start_date, end_date, buyer_id='0', status_id='0',
             vertical_id='0', priority_only='FALSE', active_only='FALSE',
@@ -1496,9 +1435,7 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #--------------------------------GET----------------------------------#
-
 
     def get(self, item=None, **kwargs):
         if item is None:
@@ -1529,11 +1466,8 @@ class CAKEApi(object):
         
         return self._api_call(url=api_url, params=parameters)
 
-
 #------------------------------REPORTS--------------------------------#
 
-
-    @_required_params(['start_date', 'end_date'])
     def brand_advertiser_summary(
             self, start_date, end_date, brand_advertiser_id='0',
             brand_advertiser_manager_id='0', brand_advertiser_tag_id='0',
@@ -1556,7 +1490,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def campaign_summary(
             self, start_date, end_date, campaign_id='0',
             source_affiliate_id='0', subid_id='', site_offer_id='0',
@@ -1585,7 +1518,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def clicks(
             self, start_date, end_date, affiliate_id='0', advertiser_id='0',
             offer_id='0', campaign_id='0', creative_id='0',
@@ -1613,7 +1545,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['changes_since'])
     def conversion_changes(
             self, changes_since, include_new_conversions='FALSE',
             affiliate_id='0', advertiser_id='0', offer_id='0',
@@ -1642,7 +1573,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def conversions(
             self, start_date, end_date, event_type='all', event_id='0',
             source_affiliate_id='0', brand_advertiser_id='0', channel_id='0',
@@ -1694,7 +1624,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     @_must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
     def country_summary(
             self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
@@ -1719,7 +1648,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     @_must_have_one(['site_offer_id', 'campaign_id'])
     def creative_summary(
             self, start_date, end_date, site_offer_id='0', campaign_id='0',
@@ -1742,7 +1670,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def daily_summary(
             self, start_date, end_date, source_affiliate_id='0',
             brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
@@ -1768,7 +1695,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def leads_by_buyer(
             self, start_date, end_date, vertical_id='0', buyer_id='0',
             buyer_contract_id='0', status_id='0', sub_status_id='0',
@@ -1795,7 +1721,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def leads_by_affiliate(
             self, start_date, end_date, affiliate_id='0', contact_id='0',
             **kwargs):
@@ -1813,7 +1738,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def lite_clicks_advertiser_summary(
             self, start_date, end_date, advertiser_id='0',
             advertiser_manager_id='0', advertiser_tag_id='0', event_id='0',
@@ -1835,7 +1759,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def lite_clicks_affiliate_summary(
             self, start_date, end_date, affiliate_id='0',
             affiliate_manager_id='0', affiliate_tag_id='0', offer_tag_id='0',
@@ -1858,7 +1781,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def lite_clicks_campaign_summary(
             self, start_date, end_date, affiliate_id='0', subaffiliate_id='',
             affiliate_tag_id='0', offer_id='0', offer_tag_id='0',
@@ -1884,7 +1806,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     @_must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
     def lite_clicks_country_summary(
             self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
@@ -1909,7 +1830,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def lite_clicks_daily_summary(
             self, start_date, end_date, affiliate_id='0', advertiser_id='0',
             offer_id='0', vertical_id='0', campaign_id='0', creative_id='0',
@@ -1934,7 +1854,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def lite_clicks_offer_summary(
             self, start_date, end_date, advertiser_id='0',
             advertiser_manager_id='0', offer_id='0', offer_tag_id='0',
@@ -1959,7 +1878,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date', 'source_affiliate_id'])
     def lite_clicks_sub_id_summary(
             self, start_date, end_date, source_affiliate_id, site_offer_id='0',
             campaign_id='0', sub_id='NULL', event_id='0',
@@ -1982,7 +1900,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def login_export(self, start_date, end_date, role_id='0', **kwargs):
         api_url = '{}://{}/api/1/reports.asmx/LoginExport'.format(
             self.protocol, self.admin_domain)
@@ -1996,7 +1913,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def order_details(
             self, start_date, end_date, affiliate_id='0', conversion_id='0',
             order_id='', start_at_row='0', row_limit='0',
@@ -2020,7 +1936,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def site_offer_summary(
             self, start_date, end_date, brand_advertiser_id='0',
             brand_advertiser_manager_id='0', site_offer_id='0',
@@ -2046,7 +1961,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date'])
     def source_affiliate_summary(
             self, start_date, end_date, source_affiliate_id='0',
             source_affiliate_manager_id='0', source_affiliate_tag_id='0',
@@ -2070,7 +1984,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)
 
 
-    @_required_params(['start_date', 'end_date', 'source_affiliate_id'])
     def sub_id_summary(
             self, start_date, end_date, source_affiliate_id, site_offer_id='0',
             event_id='0', revenue_filter='conversions_and_events', **kwargs):
@@ -2091,7 +2004,6 @@ class CAKEApi(object):
 
 
 
-    @_required_params(['start_date', 'end_date'])
     def traffic_export(self, start_date, end_date, **kwargs):
         api_url = '{}://{}/api/1/reports.asmx/TrafficExport'.format(
             self.protocol, self.admin_domain)
@@ -2103,14 +2015,8 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #-----------------------------SIGNUP--------------------------------#
 
-
-    @_required_params(
-        ['company_name', 'address_street', 'address_city', 'address_state',
-            'address_zip_code', 'address_country', 'first_name', 'last_name',
-            'email_address', 'contact_phone_work'])
     def signup_advertiser(
             self, company_name, address_street, address_city, address_state,
             address_zip_code, address_country, first_name, last_name,
@@ -2148,13 +2054,6 @@ class CAKEApi(object):
         return self._api_call(url=api_url, params=parameters)        
 
 
-    @_required_params(
-        ['affiliate_name', 'account_status_id', 'payment_setting_id', 
-            'tax_class', 'ssn_tax_id', 'address_street', 'address_city',
-            'address_state', 'address_zip_code', 'address_country',
-            'contact_first_name', 'contact_last_name', 'contact_email_address',
-            'contact_phone_work', 'contact_timezone',
-        'terms_and_conditions_agreed'])
     def signup_affiliate(
             self, affiliate_name, account_status_id, payment_setting_id,
             tax_class, ssn_tax_id, address_street, address_city, address_state,
@@ -2227,11 +2126,8 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #------------------------------TRACK--------------------------------#
 
-
-    @_required_params(['offer_id'])
     @_must_have_one(['conversion_id', 'request_session_id', 'transaction_id'])
     @_if_one_then_all(('payout', 'add_to_existing_payout'))
     @_if_one_then_all(('received', 'received_option'))
@@ -2272,11 +2168,8 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
-
 #-----------------------------AFFILIATE------------------------------#
 
-
-    @_required_params(['affiliate_id', 'affiliate_api_key'])
     def affiliate_offer_feed(
             self, affiliate_id, affiliate_api_key, campaign_name='',
             media_type_category_id='0', vertical_category_id='0',
@@ -2299,7 +2192,4 @@ class CAKEApi(object):
         parameters['row_limit'] = row_limit
 
         return self._api_call(url=api_url, params=parameters)
-
-
-
 
