@@ -73,8 +73,7 @@ class CAKEApi(object):
         campaign_export = self.export_campaigns(
             campaign_id=campaign_id, force_json=True)
         try:
-            campaign_export_json = _json.loads(campaign_export)
-            all_campaigns = campaign_export_json['d']['campaigns']
+            all_campaigns = campaign_export['campaigns']
             campaign_data = all_campaigns[0]
             original_campaign = campaign_data['original']
             if original_campaign:
@@ -662,12 +661,10 @@ class CAKEApi(object):
 
         advertiser_export = self.export_advertisers(
             advertiser_id=advertiser_id, force_json=True)
-        advertiser_export_json = _json.loads(advertiser_export)
-        if advertiser_export_json['d']['row_count'] == 0:
+        if advertiser_export['row_count'] == 0:
             current_notes = ''
         else:
-            current_notes = (advertiser_export_json['d']['advertisers'][0]
-                ['notes'])
+            current_notes = advertiser_export['advertisers'][0]['notes']
 
         api_url = '{}://{}/api/1/addedit.asmx/Advertiser'.format(
             self.protocol, self.admin_domain)
@@ -714,27 +711,26 @@ class CAKEApi(object):
         
         affiliate_export = self.export_affiliates(
             affiliate_id=affiliate_id, force_json=True)
-        affiliate_export_json = _json.loads(affiliate_export)
-        if affiliate_export_json['d']['row_count'] == 0:
+        if affiliate_export['row_count'] == 0:
             current_hide_offers = 'FALSE'
             current_vat_required = 'FALSE'
             current_payment_to = 0
             current_fire_global = 'FALSE'
             current_notes = ''
         else:
-            current_hide_offers = (affiliate_export_json['d']['affiliates'][0]
+            current_hide_offers = (affiliate_export['affiliates'][0]
                 ['hide_offers'])
-            current_vat_required = (affiliate_export_json['d']['affiliates'][0]
+            current_vat_required = (affiliate_export['affiliates'][0]
                 ['pay_vat'])
-            current_payment_to = (affiliate_export_json['d']['affiliates'][0]
+            current_payment_to = (affiliate_export['affiliates'][0]
                 ['payment_to'])
             if current_payment_to == 'Company':
                 current_payment_to = 0
             else:
                 current_payment_to = 1
-            current_fire_global = (affiliate_export_json['d']['affiliates'][0]
+            current_fire_global = (affiliate_export['affiliates'][0]
                 ['fire_global_pixel'])
-            current_notes = affiliate_export_json['d']['affiliates'][0]['notes']
+            current_notes = affiliate_export['affiliates'][0]['notes']
         
         api_url = '{}://{}/api/2/addedit.asmx/Affiliate'.format(
             self.protocol, self.admin_domain)
@@ -882,14 +878,13 @@ class CAKEApi(object):
 
         campaign_export = self.export_campaigns(
             campaign_id=campaign_id, force_json=True)
-        campaign_export_json = _json.loads(campaign_export)
-        if campaign_export_json['d']['row_count'] == 0:
+        if campaign_export['row_count'] == 0:
             current_hash = 'none'
         else:
-            if campaign_export_json['d']['campaigns'][0]['pixel_info'] is None:
+            if campaign_export['campaigns'][0]['pixel_info'] is None:
                 current_hash = 'none'
             else:
-                current_hash = (campaign_export_json['d']['campaigns'][0]
+                current_hash = (campaign_export['campaigns'][0]
                     ['pixel_info']['hash_type']['hash_type_name'].lower()
                     .replace(' ', '_'))
 
@@ -999,10 +994,9 @@ class CAKEApi(object):
     #     if is_preview_file == '':
     #         creative_export = self.export_creatives(
     #             creative_id=creative_id, force_json=True)
-    #         creative_export_json = _json.loads(creative_export)
-    #         if creative_export_json['d']['row_count'] == 0:
+    #         if creative_export['row_count'] == 0:
     #             raise Exception('Invalid Creative ID')
-    #         creative_data = creative_export_json['d']['creatives'][0]
+    #         creative_data = creative_export['creatives'][0]
     #         creative_files = creative_data['creative_files']
     #         if creative_files is None:
     #             error_text = 'No creative files found for Creative {}'.format(

@@ -1,5 +1,10 @@
 # pycake Changelog
 
+###v1.11.1
+- January 9, 2018
+- Bug fix: some CAKEApi functions raised *TypeError: the JSON object must be str, bytes or bytearray, not 'dict'*
+
+
 ###v1.11.0
 - November 29, 2017
 - When ``CAKEApi.json_response=True``, functions will return a json object instead of a string
