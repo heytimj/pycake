@@ -2162,6 +2162,16 @@ class CAKEApi(object):
 
         return self._api_call(url=api_url, params=parameters)
 
+
+    def conversion_dispositions(self):
+        api_url = '{}://{}/api/2/track.asmx/ConversionDispositions'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._api_call(url=api_url, params=parameters)
+
 #-----------------------------AFFILIATE------------------------------#
 
     def affiliate_offer_feed(

@@ -17,13 +17,10 @@ For example, if you want to edit one setting on one offer (ADDEDIT Offer), you c
 
 In short, if settings or filters are not explicitly called out when using a CAKEApi funtion, they are automatically skipped or all results returned (depending on the underlying API method type).
 
-Bug Fix 1.11.1
---------------
-- Some CAKEApi functions raised *TypeError: the JSON object must be str, bytes or bytearray, not 'dict'*
 
-New in 1.11.0
+New in 1.12.0
 -------------
-- When ``CAKEApi.json_response=True``, functions will return a json object instead of a string
+- Added `CAKEApi.conversion_dispositions()` function
 
 Python
 ------
