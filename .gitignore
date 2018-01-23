@@ -3,11 +3,9 @@
 *.cfg
 test.py
 /dist
-/venv
 /build
 /pycake.egg-info
-/doc
 MANIFEST
 todo.txt
 old_README.rst
-/__pycache__t
+/__pycache__

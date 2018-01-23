@@ -1,8 +1,8 @@
 # pycake Changelog
 
-#v2.0.1
+#v2.0.1,2
 - January 23, 2018
-- pypi distirbution still referencing 1.12.0 package contents
+- pypi distirbution was still referencing 1.12.0 package contents
 
 ##v2.0.0
 - January 23, 2018

@@ -1,0 +1,3 @@
+include CHANGELOG.md
+include README.rst
+recursive-include pycake *.py
