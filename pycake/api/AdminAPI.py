@@ -2,28 +2,29 @@ import requests as _requests
 import json as _json
 from collections import OrderedDict as _OrderedDict
 from datetime import datetime as _datetime
-from functools import wraps as _wraps
+from .function_validation import _must_have_one, _if_one_then_all
+from .ResponseFormat import ResponseFormat
 
 
-class CAKEApi(object):
+class AdminAPI(object):
+    
     def __init__(
-            self, admin_domain=None, api_key=None, use_https=True,
-            json_response=False):
-
-        if admin_domain is None:
-            raise Exception('Missing argument: admin_domain')
+            self, admin_domain, api_key=None,
+            response_format=ResponseFormat.JSON, use_https=True):
+        
         self.admin_domain = admin_domain
         self.api_key = api_key
+        self.response_format = response_format
         self.protocol = 'https' if use_https else 'http'
-        self.json_response = json_response
+        # super().__init__()
 
 
-    def _api_call(self, url, params, force_json=False):
+    def _make_api_call(self, url, params, force_json=False):
         if self.api_key is None:
-            raise Exception('No API key has been set. You must initialize a '
-                'CAKEApi object with an api_key or use the set_api_key() '
-                'function on an existing CAKEApi object')
-        elif self.json_response == True or force_json:
+            raise Exception('No API key has been set. You must initialize an '
+                'AdminAPI object with an api_key or use the '
+                'set_api_key() function on an existing AdminAPI object')
+        elif self.response_format.upper() == 'JSON' or force_json:
             request = _requests.post(url, json=params, stream=True)
             raw_response = request.text
             try:
@@ -33,40 +34,11 @@ class CAKEApi(object):
             except:
                 request = _requests.post(url, data=params, stream=True)
                 raw_response = request.text
-                return raw_response  
+                return raw_response   
         else:
             request = _requests.post(url, data=params, stream=True)
             response = request.text
             return response
-
-
-    def _must_have_one(param_list):
-        def actual_decorator(f):
-            @_wraps(f)
-            def wrapper(*args, **kwargs):
-                if not any(i in kwargs for i in param_list):
-                    raise Exception('Please provide one of the following: '
-                        '{}'. format(', '.join(param_list)))
-                else:
-                    return f(*args, **kwargs)
-            return wrapper
-        return actual_decorator
-
-
-    def _if_one_then_all(param_list):
-        def actual_decorator(f):
-            @_wraps(f)
-            def wrapper(*args, **kwargs):
-                for param in param_list:
-                    if (param in kwargs and not
-                            all(param in kwargs for param in param_list)):
-                        raise Exception('If providing one of the following '
-                            'please provide all: {}'.format(
-                            ', '.join(param_list)))
-                else:
-                    return f(*args, **kwargs)
-            return wrapper
-        return actual_decorator
 
 
     def _get_exception_type(self, campaign_id):
@@ -83,6 +55,7 @@ class CAKEApi(object):
         except:   
             raise Exception('Invalid campaign ID')
         
+    #--------------------------------API_KEY----------------------------------#
 
     def set_api_key(self, username, password, **kwargs):
         api_url = '{}://{}/api/1/get.asmx/GetAPIKey'.format(self.protocol,
@@ -102,7 +75,7 @@ class CAKEApi(object):
         except:
             self.api_key = None
 
-#-----------------------------ACCOUNTING------------------------------#
+    #-------------------------------ACCOUNTING--------------------------------#
 
     def export_advertiser_bills(
             self, billing_period_start_date, 
@@ -118,7 +91,7 @@ class CAKEApi(object):
             str(billing_period_start_date))
         parameters['billing_period_end_date'] = str(billing_period_end_date)
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def export_affiliate_bills(
@@ -138,9 +111,9 @@ class CAKEApi(object):
         parameters['paid_only'] = paid_only
         parameters['payment_type_id'] = payment_type_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
-#------------------------------ADDEDIT--------------------------------#
+    #--------------------------------ADDEDIT----------------------------------#
 
     def add_advertiser(
             self, advertiser_name, third_party_name='', account_status_id='1',
@@ -173,7 +146,7 @@ class CAKEApi(object):
         parameters['notes'] = notes
         parameters['tags'] = tags
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_affiliate(
@@ -244,7 +217,7 @@ class CAKEApi(object):
             terms_and_conditions_agreed)
         parameters['notes'] = notes
         
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_must_have_one(['advertiser_id', 'offer_id'])
@@ -268,7 +241,7 @@ class CAKEApi(object):
         parameters['blacklist_date'] = str(blacklist_date)
         parameters['blacklist_date_modification_type'] = 'change'
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_if_one_then_all(['credit_type', 'credit_limit'])
@@ -299,7 +272,7 @@ class CAKEApi(object):
         parameters['credit_type'] = credit_type
         parameters['credit_limit'] = credit_limit
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_buyer_contract(
@@ -338,7 +311,7 @@ class CAKEApi(object):
         parameters['email_template_id'] = email_template_id
         parameters['portal_template_id'] = portal_template_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_must_have_one(['offer_id', 'offer_contract_id'])
@@ -414,7 +387,7 @@ class CAKEApi(object):
         parameters['test_link'] = test_link
         parameters['redirect_domain'] = redirect_domain
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_campaign_creative_exception(
@@ -432,7 +405,7 @@ class CAKEApi(object):
         parameters['creative_exception_type'] = exception_type
         parameters['creative_modification_type'] = 'add'
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_campaign_subid_exception(
@@ -450,7 +423,7 @@ class CAKEApi(object):
         parameters['sub_id_exception_type'] = exception_type
         parameters['sub_id_modification_type'] = 'add'
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_contact(
@@ -487,7 +460,7 @@ class CAKEApi(object):
         parameters['contact_timezone'] = contact_timezone
         parameters['contact_language_id'] = contact_language_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_creative(
@@ -513,7 +486,7 @@ class CAKEApi(object):
         parameters['allow_link_override'] = allow_link_override
         parameters['notes'] = notes
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def add_creative_files(
@@ -531,7 +504,7 @@ class CAKEApi(object):
         parameters['is_preview_file'] = is_preview_file
         parameters['replace_all_files'] = replace_all_files
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_if_one_then_all(['tags', 'tags_modification_type'])
@@ -649,7 +622,7 @@ class CAKEApi(object):
             allowed_media_type_modification_type)
         parameters['allowed_media_type_ids'] = allowed_media_type_ids
         
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_advertiser(
@@ -690,7 +663,7 @@ class CAKEApi(object):
             current_notes + '\n' + notes)
         parameters['tags'] = tags
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_affiliate(
@@ -786,7 +759,7 @@ class CAKEApi(object):
         parameters['notes'] = (current_notes if notes == '' else
             current_notes + '\n' + notes)
         
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_buyer(
@@ -816,7 +789,7 @@ class CAKEApi(object):
         parameters['credit_type'] = credit_type
         parameters['credit_limit'] = credit_limit
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_buyer_contract(
@@ -855,7 +828,7 @@ class CAKEApi(object):
         parameters['email_template_id'] = email_template_id
         parameters['portal_template_id'] = portal_template_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_campaign(
@@ -932,7 +905,7 @@ class CAKEApi(object):
         parameters['test_link'] = test_link
         parameters['redirect_domain'] = redirect_domain
     
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_must_have_one(['offer_id', 'offer_contract_id', 'campaign_id'])
@@ -956,7 +929,7 @@ class CAKEApi(object):
             cap_start == '' else str(cap_start))
         parameters['send_alert_only'] = send_alert_only
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def edit_creative(
@@ -981,12 +954,10 @@ class CAKEApi(object):
         parameters['allow_link_override'] = allow_link_override
         parameters['notes'] = notes
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
     #      WAITING FOR BUG RESOLUTION IN UNDERLYING CAKE API
     
-    # @_required_params(
-    #     ['creative_id', 'creative_file_id'])
     # def edit_creative_files(
     #         self, creative_id, creative_file_id, creative_file_import_url='',
     #         is_preview_file='', replace_all_files='FALSE', **kwargs):
@@ -1020,7 +991,7 @@ class CAKEApi(object):
     #     parameters['is_preview_file'] = is_preview_file
     #     parameters['replace_all_files'] = replace_all_files
 
-    #     return self._api_call(url=api_url, params=parameters)
+    #     return self._make_api_call(url=api_url, params=parameters)
 
 
     @_if_one_then_all(['tags', 'tags_modification_type'])
@@ -1143,7 +1114,7 @@ class CAKEApi(object):
             allowed_media_type_modification_type)
         parameters['allowed_media_type_ids'] = allowed_media_type_ids
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def remove_blacklist(self, blacklist_id, **kwargs):
@@ -1154,7 +1125,7 @@ class CAKEApi(object):
         parameters['api_key'] = self. api_key
         parameters['blacklist_id'] = blacklist_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def remove_campaign_creative_exception(
@@ -1172,7 +1143,7 @@ class CAKEApi(object):
         parameters['creative_exception_type'] = exception_type
         parameters['creative_modification_type'] = 'remove'
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def remove_campaign_subid_exception(
@@ -1190,9 +1161,9 @@ class CAKEApi(object):
         parameters['sub_id_exception_type'] = exception_type
         parameters['sub_id_modification_type'] = 'remove'
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
-#-------------------------------EXPORT--------------------------------#
+    #---------------------------------EXPORT----------------------------------#
 
     def export_advertisers(
             self, advertiser_id='0', advertiser_name='',
@@ -1216,7 +1187,7 @@ class CAKEApi(object):
 
         force_json = kwargs['force_json'] if 'force_json' in kwargs else False
 
-        return self._api_call(
+        return self._make_api_call(
             url=api_url, params=parameters, force_json=force_json)
 
 
@@ -1241,7 +1212,7 @@ class CAKEApi(object):
          
         force_json = kwargs['force_json'] if 'force_json' in kwargs else False
 
-        return self._api_call(
+        return self._make_api_call(
             url=api_url, params=parameters, force_json=force_json)
 
 
@@ -1261,7 +1232,7 @@ class CAKEApi(object):
 
         force_json = kwargs['force_json'] if 'force_json' in kwargs else False
 
-        return self._api_call(
+        return self._make_api_call(
             url=api_url, params=parameters, force_json=force_json)
 
 
@@ -1279,7 +1250,7 @@ class CAKEApi(object):
         parameters['vertical_id'] = vertical_id
         parameters['buyer_contract_status_id'] = buyer_contract_status_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def export_buyers(self, buyer_id='0', account_status_id='0', **kwargs):
@@ -1291,7 +1262,7 @@ class CAKEApi(object):
         parameters['buyer_id'] = buyer_id
         parameters['account_status_id'] = account_status_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_must_have_one(['offer_id', 'affiliate_id', 'campaign_id'])
@@ -1318,7 +1289,7 @@ class CAKEApi(object):
         
         force_json = kwargs['force_json'] if 'force_json' in kwargs else False
 
-        return self._api_call(
+        return self._make_api_call(
             url=api_url, params=parameters, force_json=force_json)
 
 
@@ -1345,7 +1316,7 @@ class CAKEApi(object):
 
         force_json = kwargs['force_json'] if 'force_json' in kwargs else False
 
-        return self._api_call(
+        return self._make_api_call(
             url=api_url, params=parameters, force_json=force_json)
 
 
@@ -1373,7 +1344,10 @@ class CAKEApi(object):
         parameters['sort_field'] = sort_field
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
+        force_json = kwargs['force_json'] if 'force_json' in kwargs else False
+
+        return self._make_api_call(
+            url=api_url, params=parameters, force_json=force_json)
 
 
     def export_pixel_log_requests(
@@ -1395,7 +1369,7 @@ class CAKEApi(object):
         parameters['row_limit'] = row_limit
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def export_rule_targets(self, rule_id, **kwargs):
@@ -1406,7 +1380,7 @@ class CAKEApi(object):
         parameters['api_key'] = self.api_key
         parameters['rule_id'] = rule_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def export_schedules(
@@ -1427,40 +1401,424 @@ class CAKEApi(object):
         parameters['priority_only'] = priority_only
         parameters['active_only'] = active_only
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
-#--------------------------------GET----------------------------------#
+    #----------------------------------GET------------------------------------#
 
-    def get(self, item=None, **kwargs):
-        if item is None:
-            raise Exception(('Missing argument: item. For a list of valid '
-                'items please see http://{}/api/1/get.asmx'
-                .format(self.admin_domain)))
-        elif item not in [
-                'AccountStatuses', 'Advertisers', 'AffiliateTags',
-                'AffiliateTiers', 'BillingCycles', 'BlacklistReasons',
-                'CapIntervals', 'CapTypes', 'Countries', 'Currencies',
-                'CustomQueueStatuses', 'Departments', 'EmailTemplates',
-                'ExchangeRates', 'FilterTypes', 'GetAPIKey',
-                'InactiveReasons', 'Languages', 'LeadInfo', 'LeadTierGroups',
-                'LinkDisplayTypes', 'MediaTypes', 'OfferStatuses',
-                'OfferTypes', 'PaymentSettings', 'PaymentTypes',
-                'PriceFormats', 'ResponseDispositions', 'Roles',
-                'ScheduleTypes', 'SessionRegenerationTypes', 'SharedRules',
-                'TrackingDomains', 'Verticals']:
-            raise Exception(('Invalid item: {}. For a list of valid items '
-                'please see http://{}/api/1/get.asmx'.format(item,
-                    self.admin_domain)))
-            
-        api_url = '{}://{}/api/1/get.asmx/{}'.format(self.protocol,
-            self.admin_domain, item)
-        
-        parameters = {key: kwargs[key] for key in kwargs}
+    def get_account_statuses(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/AccountStatuses'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
         parameters['api_key'] = self.api_key
-        
-        return self._api_call(url=api_url, params=parameters)
 
-#------------------------------REPORTS--------------------------------#
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_advertisers(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Advertisers'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        force_json = kwargs['force_json'] if 'force_json' in kwargs else False
+
+        return self._make_api_call(
+            url=api_url, params=parameters, force_json=force_json)
+
+
+    def get_affiliate_tags(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/AffiliateTags'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_affiliate_tiers(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/AffiliateTiers'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_billing_cycles(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/BillingCycles'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_blacklist_reasons(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/BlacklistReasons'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_cap_intervals(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/CapIntervals'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_cap_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/CapTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_conversion_dispositions(self, **kwargs):
+
+        api_url = '{}://{}/api/2/track.asmx/ConversionDispositions'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_countries(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Countries'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_currencies(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Currencies'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_custom_queue_statuses(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/CustomQueueStatuses'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_departments(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Departments'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_email_templates(self, email_type='both', **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/EmailTemplates'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['email_type'] = email_type
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_exchange_rates(self, start_date, end_date, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/ExchangeRates'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = start_date
+        parameters['end_date'] = end_date
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_filter_types(
+            self, filter_type_id='0', filter_type_name='', vertical_id='0',
+            **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/FilterTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['filter_type_id'] = filter_type_id
+        parameters['filter_type_name'] = filter_type_name
+        parameters['vertical_id'] = vertical_id
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_api_key(self, username, password, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/GetAPIKey'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['username'] = username
+        parameters['password'] = password
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_inactive_reasons(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/InactiveReasons'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_languages(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Languages'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_lead_info(self, lead_id, vertical_id='0', **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/LeadInfo'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['lead_id'] = lead_id
+        parameters['vertical_id'] = vertical_id
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_lead_tier_groups(self, lead_tier_group_id='0', **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/LeadTierGroups'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['lead_tier_group_id'] = lead_tier_group_id
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_link_display_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/LinkDisplayTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_media_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/MediaTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_offer_statuses(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/OfferStatuses'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_offer_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/OfferTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_payment_settings(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/PaymentSettings'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_payment_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/PaymentTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_price_formats(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/PriceFormats'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_response_dispositions(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/ResponseDispositions'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_roles(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/Roles'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_schedule_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/ScheduleTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_session_regeneration_types(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/SessionRegenerationTypes'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_shared_rules(self, **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/SharedRules'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_tracking_domains(self, domain_type='all', **kwargs):
+
+        api_url = '{}://{}/api/1/get.asmx/TrackingDomains'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['domain_type'] = domain_type
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_verticals(self, vertical_category_id='0', **kwargs):
+
+        api_url = '{}://{}/api/2/get.asmx/Verticals'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['vertical_category_id'] = vertical_category_id
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def get_vertical_categories(self, **kwargs):
+
+        api_url = '{}://{}/api/1/signup.asmx/GetVerticalCategories'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    #--------------------------------REPORTS----------------------------------#
 
     def brand_advertiser_summary(
             self, start_date, end_date, brand_advertiser_id='0',
@@ -1481,7 +1839,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['event_type'] = event_type
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def campaign_summary(
@@ -1509,7 +1867,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['event_type'] = event_type
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def clicks(
@@ -1536,7 +1894,7 @@ class CAKEApi(object):
         parameters['start_at_row'] = start_at_row
         parameters['row_limit'] = row_limit
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def conversion_changes(
@@ -1564,10 +1922,81 @@ class CAKEApi(object):
         parameters['sort_field'] = sort_field
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
-    def conversions(
+    @_must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
+    def country_summary(
+            self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
+            advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
+            revenue_filter='conversions_and_events', **kwargs):
+
+        api_url = '{}://{}/api/1/reports.asmx/CountrySummary'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
+        parameters['affiliate_id'] = affiliate_id
+        parameters['affiliate_tag_id'] = affiliate_tag_id
+        parameters['advertiser_id'] = advertiser_id
+        parameters['offer_id'] = offer_id
+        parameters['campaign_id'] = campaign_id
+        parameters['event_id'] = event_id
+        parameters['revenue_filter'] = revenue_filter
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    @_must_have_one(['site_offer_id', 'campaign_id'])
+    def creative_summary(
+            self, start_date, end_date, site_offer_id='0', campaign_id='0',
+            event_id='0', event_type='all', **kwargs):
+
+        api_url = '{}://{}/api/3/reports.asmx/CreativeSummary'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
+        parameters['site_offer_id'] = (0 if site_offer_id is None else
+            site_offer_id)
+        parameters['campaign_id'] = (0 if campaign_id is None else
+            campaign_id)
+        parameters['event_id'] = event_id
+        parameters['event_type'] = event_type
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def daily_summary(
+            self, start_date, end_date, source_affiliate_id='0',
+            brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
+            campaign_id='0', creative_id='0', account_manager_id='0',
+            include_tests='FALSE', **kwargs):
+
+        api_url = '{}://{}/api/2/reports.asmx/DailySummaryExport'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = _OrderedDict()
+        parameters['api_key'] = self.api_key
+        parameters['start_date'] = str(start_date)
+        parameters['end_date'] = str(end_date)
+        parameters['source_affiliate_id'] = source_affiliate_id
+        parameters['brand_advertiser_id'] = brand_advertiser_id
+        parameters['site_offer_id'] = site_offer_id
+        parameters['vertical_id'] = vertical_id
+        parameters['campaign_id'] = campaign_id
+        parameters['creative_id'] = creative_id
+        parameters['account_manager_id'] = account_manager_id
+        parameters['include_tests'] = include_tests
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
+    def events_conversions(
             self, start_date, end_date, event_type='all', event_id='0',
             source_affiliate_id='0', brand_advertiser_id='0', channel_id='0',
             site_offer_id='0', site_offer_contract_id='0',
@@ -1615,78 +2044,7 @@ class CAKEApi(object):
         parameters['sort_field'] = sort_field
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
-
-
-    @_must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
-    def country_summary(
-            self, start_date, end_date, affiliate_id='0', affiliate_tag_id='0',
-            advertiser_id='0', offer_id='0', campaign_id='0', event_id='0',
-            revenue_filter='conversions_and_events', **kwargs):
-
-        api_url = '{}://{}/api/1/reports.asmx/CountrySummary'.format(
-            self.protocol, self.admin_domain)
-
-        parameters = _OrderedDict()
-        parameters['api_key'] = self.api_key
-        parameters['start_date'] = str(start_date)
-        parameters['end_date'] = str(end_date)
-        parameters['affiliate_id'] = affiliate_id
-        parameters['affiliate_tag_id'] = affiliate_tag_id
-        parameters['advertiser_id'] = advertiser_id
-        parameters['offer_id'] = offer_id
-        parameters['campaign_id'] = campaign_id
-        parameters['event_id'] = event_id
-        parameters['revenue_filter'] = revenue_filter
-
-        return self._api_call(url=api_url, params=parameters)
-
-
-    @_must_have_one(['site_offer_id', 'campaign_id'])
-    def creative_summary(
-            self, start_date, end_date, site_offer_id='0', campaign_id='0',
-            event_id='0', event_type='all', **kwargs):
-
-        api_url = '{}://{}/api/3/reports.asmx/CreativeSummary'.format(
-            self.protocol, self.admin_domain)
-
-        parameters = _OrderedDict()
-        parameters['api_key'] = self.api_key
-        parameters['start_date'] = str(start_date)
-        parameters['end_date'] = str(end_date)
-        parameters['site_offer_id'] = (0 if site_offer_id is None else
-            site_offer_id)
-        parameters['campaign_id'] = (0 if campaign_id is None else
-            campaign_id)
-        parameters['event_id'] = event_id
-        parameters['event_type'] = event_type
-
-        return self._api_call(url=api_url, params=parameters)
-
-
-    def daily_summary(
-            self, start_date, end_date, source_affiliate_id='0',
-            brand_advertiser_id='0', site_offer_id='0', vertical_id='0',
-            campaign_id='0', creative_id='0', account_manager_id='0',
-            include_tests='FALSE', **kwargs):
-
-        api_url = '{}://{}/api/2/reports.asmx/DailySummaryExport'.format(
-            self.protocol, self.admin_domain)
-
-        parameters = _OrderedDict()
-        parameters['api_key'] = self.api_key
-        parameters['start_date'] = str(start_date)
-        parameters['end_date'] = str(end_date)
-        parameters['source_affiliate_id'] = source_affiliate_id
-        parameters['brand_advertiser_id'] = brand_advertiser_id
-        parameters['site_offer_id'] = site_offer_id
-        parameters['vertical_id'] = vertical_id
-        parameters['campaign_id'] = campaign_id
-        parameters['creative_id'] = creative_id
-        parameters['account_manager_id'] = account_manager_id
-        parameters['include_tests'] = include_tests
-
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def leads_by_buyer(
@@ -1712,12 +2070,14 @@ class CAKEApi(object):
         parameters['sort_field'] = sort_field
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def leads_by_affiliate(
-            self, start_date, end_date, affiliate_id='0', contact_id='0',
-            **kwargs):
+            self, start_date, end_date, vertical_id='0',
+            source_affiliate_id='0', site_offer_id='0',
+            source_affiliate_manager_id='0', upsell='upsells_and_non_upsells',
+            lead_tier_id='0', start_at_row='0', row_limit='0', **kwargs):
 
         api_url = '{}://{}/api/1/reports.asmx/LeadsByAffiliateExport'.format(
             self.protocol, self.admin_domain) 
@@ -1726,10 +2086,16 @@ class CAKEApi(object):
         parameters['api_key'] = self.api_key
         parameters['start_date'] = str(start_date)
         parameters['end_date'] = str(end_date)
-        parameters['affiliate_id'] = affiliate_id
-        parameters['contact_id'] = contact_id
+        parameters['vertical_id'] = vertical_id
+        parameters['source_affiliate_id'] = source_affiliate_id
+        parameters['site_offer_id'] = site_offer_id
+        parameters['source_affiliate_manager_id'] = source_affiliate_manager_id
+        parameters['upsell'] = upsell
+        parameters['lead_tier_id'] = lead_tier_id
+        parameters['start_at_row'] = start_at_row
+        parameters['row_limit'] = row_limit
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_advertiser_summary(
@@ -1750,7 +2116,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_affiliate_summary(
@@ -1772,7 +2138,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_campaign_summary(
@@ -1797,7 +2163,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
         
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     @_must_have_one(['advertiser_id', 'offer_id', 'affiliate_id', 'campaign_id'])
@@ -1821,7 +2187,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_daily_summary(
@@ -1845,7 +2211,7 @@ class CAKEApi(object):
         parameters['account_manager_id'] = account_manager_id
         parameters['include_tests'] = include_tests
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_offer_summary(
@@ -1869,7 +2235,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def lite_clicks_sub_id_summary(
@@ -1891,7 +2257,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def login_export(self, start_date, end_date, role_id='0', **kwargs):
@@ -1904,7 +2270,7 @@ class CAKEApi(object):
         parameters['end_date'] = str(end_date)
         parameters['role_id'] = role_id
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def order_details(
@@ -1927,7 +2293,7 @@ class CAKEApi(object):
         parameters['sort_field'] = sort_field
         parameters['sort_descending'] = sort_descending
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def site_offer_summary(
@@ -1952,7 +2318,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['event_type'] = event_type
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def source_affiliate_summary(
@@ -1975,7 +2341,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['event_type'] = event_type
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
     def sub_id_summary(
@@ -1994,7 +2360,7 @@ class CAKEApi(object):
         parameters['event_id'] = event_id
         parameters['revenue_filter'] = revenue_filter
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
 
 
@@ -2007,9 +2373,9 @@ class CAKEApi(object):
         parameters['start_date'] = str(start_date)
         parameters['end_date'] = str(end_date)
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
-#-----------------------------SIGNUP--------------------------------#
+    #--------------------------------SIGNUP-----------------------------------#
 
     def signup_advertiser(
             self, company_name, address_street, address_city, address_state,
@@ -2045,7 +2411,7 @@ class CAKEApi(object):
         parameters['contact_im_service'] = contact_im_service
         parameters['ip_address'] = ip_address
 
-        return self._api_call(url=api_url, params=parameters)        
+        return self._make_api_call(url=api_url, params=parameters)        
 
 
     def signup_affiliate(
@@ -2118,9 +2484,9 @@ class CAKEApi(object):
         parameters['terms_and_conditions_agreed'] = terms_and_conditions_agreed
         parameters['notes'] = notes
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
 
-#------------------------------TRACK--------------------------------#
+    #---------------------------------TRACK-----------------------------------#
 
     @_must_have_one(['conversion_id', 'request_session_id', 'transaction_id'])
     @_if_one_then_all(('payout', 'add_to_existing_payout'))
@@ -2160,40 +2526,46 @@ class CAKEApi(object):
         parameters['note_to_append'] = note_to_append
         parameters['disallow_on_billing_status'] = disallow_on_billing_status
 
-        return self._api_call(url=api_url, params=parameters)
+        return self._make_api_call(url=api_url, params=parameters)
+
+    #--------------------------------SPECIAL----------------------------------#
+
+    def get_advertiser_ids(self):
+        """Returns a list of all Advertiser IDs"""
+
+        advertiser_export = self.get_advertisers(force_json=True)
+        advertiser_ids = [_['advertiser_id'] for _ in advertiser_export]
+        return advertiser_ids
 
 
-    def conversion_dispositions(self):
-        api_url = '{}://{}/api/2/track.asmx/ConversionDispositions'.format(
-            self.protocol, self.admin_domain)
+    def get_affiliate_ids(self):
+        """Returns a list of all Affiliate IDs"""
 
-        parameters = _OrderedDict()
-        parameters['api_key'] = self.api_key
+        CHUNK_SIZE = 2500
+        test_export = self.export_affiliates(row_limit=1, force_json=True)
+        affiliate_count = test_export['row_count']
+        if affiliate_count % CHUNK_SIZE == 0:
+            api_call_count = affiliate_count // CHUNK_SIZE
+        else:
+            api_call_count = affiliate_count // CHUNK_SIZE + 1
+        all_affiliate_ids = []
+        start_row = 1
+        for i in range(api_call_count):
+            affiliate_export = self.export_affiliates(
+                start_at_row=start_row, row_limit=CHUNK_SIZE, force_json=True)
+            affiliates = affiliate_export['affiliates']
+            affiliate_ids = [_['affiliate_id'] for _ in affiliates]
+            all_affiliate_ids += affiliate_ids
+            start_row += CHUNK_SIZE
+        return all_affiliate_ids
 
-        return self._api_call(url=api_url, params=parameters)
 
-#-----------------------------AFFILIATE------------------------------#
+    def get_offer_ids(self, advertiser_id='0'):
+        """Returns a list of Offer IDs"""
 
-    def affiliate_offer_feed(
-            self, affiliate_id, affiliate_api_key, campaign_name='',
-            media_type_category_id='0', vertical_category_id='0',
-            vertical_id='0', offer_status_id='0', tag_id='0', start_at_row='0',
-            row_limit='0', **kwargs):
-
-        api_url = '{}://{}/affiliates/api/4/offers.asmx/OfferFeed'.format(
-            self.protocol, self.admin_domain) 
-
-        parameters = _OrderedDict()
-        parameters['affiliate_id'] = affiliate_id
-        parameters['api_key'] = affiliate_api_key
-        parameters['campaign_name'] = campaign_name
-        parameters['media_type_category_id'] = media_type_category_id
-        parameters['vertical_category_id'] = vertical_category_id
-        parameters['vertical_id'] = vertical_id
-        parameters['offer_status_id'] = offer_status_id
-        parameters['tag_id'] = tag_id
-        parameters['start_at_row'] = start_at_row
-        parameters['row_limit'] = row_limit
-
-        return self._api_call(url=api_url, params=parameters)
+        offer_export = self.export_offers(
+            advertiser_id=advertiser_id, force_json=True)
+        all_offers = offer_export['offers']
+        offer_ids = [_['offer_id'] for _ in all_offers]
+        return offer_ids
 

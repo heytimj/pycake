@@ -1,0 +1,63 @@
+from .CakeModel import CakeModel
+
+
+class SiteOffer(CakeModel):
+
+	def __init__(self, **kwargs):
+		self.param_defaults = {
+			'offer_id': None,
+			'offer_name': None,
+			'third_party_name': None,
+			'advertiser': None,
+			'vertical': None,
+			'offer_type': None,
+			'offer_status': None,
+			'hidden': None,
+			'offer_image_link': None,
+			'default_offer_contract_id': None,
+			'offer_contracts': None,
+			'tiers': None,
+			'tags': None,
+			'allowed_media_types': None,
+			'currency': None,
+			'ssl': None,
+			'cookie_domain_override': None,
+			'suppression_amount': None,
+			'click_cap': None,
+			'conversion_cap': None,
+			'click_cookie_days': None,
+			'impression_cookie_days': None,
+			'enable_view_thru_conversions': None,
+			'click_trumps_impression': None,
+			'disable_click_deduplication': None,
+			'disable_impression_deduplication': None,
+			'voucher_code_attribution': None,
+			'last_touch': None,
+			'enable_transaction_id_deduplication': None,
+			'conversions_from_whitelist_only': None,
+			'pixel_info': None,
+			'fire_global_pixel': None,
+			'fire_pixel_on_non_paid_conversions': None,
+			'disable_prepop_appending': None,
+			'redirect_offer': None,
+			'redirect_404': None,
+			'session_regeneration_seconds': None,
+			'session_regeneration_type': None,
+			'suppression_list': None,
+			'unsubscribe_link': None,
+			'preview_link': None,
+			'offer_description': None,
+			'restrictions': None,
+			'advertiser_extended_terms': None,
+			'testing_instructions': None,
+			'from_lines': None,
+			'subject_lines': None,
+			'upsells': None,
+			'thankyou_html': None,
+			'submission_options': None,
+			'date_created': None,
+			'expiration_date': None,
+			'notes': None       
+		}
+		for (param, default) in self.param_defaults.items():
+			setattr(self, param, kwargs.get(param, default))

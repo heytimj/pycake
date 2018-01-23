@@ -1,5 +1,13 @@
 # pycake Changelog
 
+##v2.0.0
+- January 23, 2018
+- `pycake.api.CAKEApi` replaced with `pycake.api.AdminAPI`
+- Added `pycake.api.AffiliateAPI` class
+- Previous `pycake.api.CAKEApi.conversions()` is now `pycake.api.AdminAPI.events_conversions()`
+- Previous `pycake.api.CAKEApi.get(item)` now split into separate `pycake.api.AdminAPI` functions for each item
+- `pycake.api.AdminAPI.leads_by_affiliate()` underlying API upgraded
+
 ##v1.12.0
 - January 18, 2018
 - Added `CAKEApi.conversion_dispositions()` function
@@ -10,7 +18,7 @@
 
 ###v1.11.0
 - November 29, 2017
-- When ``CAKEApi.json_response=True``, functions will return a json object instead of a string
+- When `CAKEApi.json_response=True`, functions will return a json object instead of a string
 
 ### v1.10.0
 - November 9, 2017
@@ -21,8 +29,8 @@
 - Added `CAKEApi.add_campaign_subid_exception()` function
 - Added `CAKEApi.remove_campaign_creative_exception()` function
 - Added `CAKEApi.remove_campaign_subid_exception()` function
-- Fixed bug in ``CAKEApi.edit_affiliate()``. Some fields' default values were not skip values.
-- Removed ``CAKEApi.edit_creative_files()``. While investigating a bug in this function I found a bug in the CAKE API that needs to be resolved before this fucntion can work properly. 
+- Fixed bug in `CAKEApi.edit_affiliate()`. Some fields' default values were not skip values.
+- Removed `CAKEApi.edit_creative_files()`. While investigating a bug in this function I found a bug in the CAKE API that needs to be resolved before this fucntion can work properly. 
 
 ### v1.9.0
 - October 27, 2017

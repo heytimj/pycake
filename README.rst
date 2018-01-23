@@ -3,71 +3,84 @@
    :align: left
 
 Introduction
-------------
-**pycake** is a python package intended to make CAKE's API *seem* more RESTful. Due to the .NET framework, without **pycake** a user would need to include every parameter with every api call. When editing an entity, this can be annoying if you're only changing one or a few settings. Additionally, when exporting entities or reporting data, it is less than ideal to have to pass every parameter(filter) if you wish to include all results. In its current form, **pycake** contains the ``pycake.api`` module. ``pycake.api`` contains the ``CAKEApi`` class designed to make calling the CAKE API a bit simpler. In the future, there will be multiple modules in this package for both making api calls (Admin and Affiliate) and handling reponses. 
-
-For example, if you want to edit one setting on one offer (ADDEDIT Offer), you can use ``CAKEApi.edit_offer()`` and only pass the ``offer_id`` and the key-value pair for the setting you wish to change:
+============
+**pycake** is a python package intended to make CAKE's API *seem* more RESTful. **pycake** contains two modules,  ``pycake.api`` and ``pycake.models``. ``pycake.api`` contains the ``AdminApi`` and ``AffiliateAPI`` classes designed to make calling the CAKE API a bit simpler. Due to the .NET framework, without **pycake** a user would need to include every parameter with every api call. When editing an entity, this can be annoying if you're only changing one or a few settings. Additionally, when exporting entities or reporting data, it is less than ideal to have to pass every parameter(filter) if you wish to include all results. For example, if you want to edit one setting on one offer (ADDEDIT Offer), you can use ``pycake.api.AdminAPI.edit_offer()`` and only pass the ``offer_id`` and the key-value pair for the setting you wish to change:
 
 .. code:: python
 
-    >>> from pycake.api import CAKEApi
-    >>> ckapi = CAKEApi(admin_domain='my.cakedomain.com', api_key='ADhakjnOtAreALkEY')
-    >>> offer_edit_response = ckapi.edit_offer(offer_id=4, click_cookie_days=60)
+    >>> from pycake.api import AdminAPI
 
+    >>> ckadmin = AdminAPI('somecakedomain.com', api_key='ADhakjnOtAreALkEY')
+    >>> offer_edit_response = ckadmin.edit_offer(offer_id=4, click_cookie_days=60)
 
-In short, if settings or filters are not explicitly called out when using a CAKEApi funtion, they are automatically skipped or all results returned (depending on the underlying API method type).
-
-
-New in 1.12.0
--------------
-- Added `CAKEApi.conversion_dispositions()` function
+New in 2.0.0
+============
+- Previous ``pycake.api.CAKEApi`` class replaced with ``pycake.api.AdminAPI``
+- Added ``pycake.api.AffiliateAPI`` class
+- Previous ``pycake.api.CAKEApi.get(item)`` split into separate ``pycake.api.AdminAPI`` functions for each item. Some new items added.
+- ``pycake.api.AdminAPI.leads_by_affiliate()`` underlying API upgraded
 
 Python
-------
+======
 Supports 2.x and 3.x
 
-Use
----
-
-**Installation**
+Installation
+============
 
 .. code:: bash
 
     $ pip3 install pycake --upgrade
     
-**Initialize a CAKEApi object with an API key**
+pycake.api Module
+=================
+pycake.api contains two classes:
+
+- **AdminAPI**\(*admin_domain, api_key=None, response_format=ResponseFormat.JSON, use_https=True*)
+- **AffiliateAPI**\(*admin_domain, affiliate_id, api_key, response_format=ResponseFormat.JSON, use_https=True*)
+
+**Initialize an AdminAPI object with an API key**
 
 .. code:: python
 
-    >>> from pycake.api import CAKEApi
-    >>> ckapi = CAKEApi(
-            admin_domain='my.cakedomain.com', api_key='ADhakjnOtAreALkEY',
-            use_https=True, json_response=True)
-    >>> advertiser_info = ckapi.get(item='Advertisers')
-    >>> offer_info = ckapi.export_offers()
+    >>> from pycake.api import AdminAPI
+
+    >>> ckadmin = AdminAPI('somecakedomain.com', api_key='ADhakjnOtAreALkEY')
+    >>> offer_info = ckadmin.export_offers()
+    >>> media_type_info = ckadmin.get_media_types()
    
-*Note:* Only ``admin_domain`` is required to initialize a CAKEApi object.
+**Initialize an AdminAPI object without an API key**
 
-**Initialize a CAKEApi Object without an API key**
-
-You can initialize a CAKEApi object without an API key and then use the ``set_api_key()`` function. This is useful when you need to utilize user-provided login credentials to perform API calls. 
+You can initialize an AdminAPI object without an API key and then use the ``set_api_key()`` function. This is useful when you need to utilize user-provided admin login credentials to perform API calls.
 
 .. code:: python
     
-    >>> from pycake.api import CAKEApi
-    >>> ckapi = CAKEApi(admin_domain='my.cakedomain.com')
+    >>> from pycake.api import AdminAPI
+
+    >>> ckadmin = AdminAPI('somecakedomain.com')
     >>> username = 'email@domain.com'
     >>> password = 'SomePassword123'
-    >>> ckapi.set_api_key(username=username, password=password)
-    >>> print(ckapi.api_key)
+    >>> ckadmin.set_api_key(username=username, password=password)
+    >>> print(ckadmin.api_key)
     ADhakjnOtAreALkEY
-    >>> conversion_data = ckapi.conversions(start_date='2017-5-1', end_date='2017-6-1')
+    >>> conversion_data = ckadmin.conversions(start_date='2017-5-1', end_date='2017-6-1')
 
-*Note:* If ``username`` and ``password`` are not valid admin credentials ``CAKEApi.api_key`` is set to ``None``. Calling subsequent CAKEApi functions other than ``CAKEApi.set_api_key()`` will raise an Exception.
+*Note:* If ``username`` and ``password`` are not valid admin credentials ``AdminAPI.api_key`` is set to ``None``. Calling subsequent AdminAPI functions other than ``set_api_key()`` will raise an Exception.
 
+**Initialize an AffiliateAPI object**
 
-Supported CAKEApi Functions
----------------------------
+.. code:: python
+
+    >>> from pycake.api import AffiliateAPI
+
+    >>> ckaff = AffiliateAPI(
+            admin_domain='somecakedomain.com',
+            affiliate_id=123,
+            api_key='ADhakjsOmeAFfaPIkEY')
+    >>> campaign_report = ckaff.campaign_summary(start_date='2017-10-1', end_date='2017-11-1')
+    >>> offer_feed = ckaff.offer_feed()
+
+AdminAPI Functions
+------------------
 
 **API KEY**
 
@@ -153,10 +166,77 @@ Supported CAKEApi Functions
 
 **GET**
 
-- **get**\(*item*)
-     
-    Click here_ for a full list of items (and any additional arguments they may require)
-          .. _here: http://staging.cakemarketing.com/api/1/GET.asmx
+- **get_account_statuses**\()
+
+- **get_advertisers**\()
+
+- **get_affiliate_tags**\()
+
+- **get_affiliate_tiers**\()
+
+- **get_billing_cycles**\()
+
+- **get_blacklist_reasons**\()
+
+- **get_cap_intervals**\()
+
+- **get_cap_types**\()
+
+- **get_conversion_dispositions**\()
+
+- **get_countries**\()
+
+- **get_currencies**\()
+
+- **get_custom_queue_statuses**\()
+
+- **get_departments**\()
+
+- **get_email_templates**\(*email_type='both'*)
+
+- **get_exchange_rates**\(*start_date, end_date*)
+
+- **get_filter_types**\(*filter_type_id='0', filter_type_name='', vertical_id='0'*)
+
+- **get_api_key**\(*username, password*)
+
+- **get_inactive_reasons**\()
+
+- **get_languages**\()
+
+- **get_lead_info**\(*lead_id, vertical_id='0'*)
+
+- **get_lead_tier_groups**\(*lead_tier_group_id='0'*)
+
+- **get_link_display_types**\()
+
+- **get_media_types**\()
+
+- **get_offer_statuses**\()
+
+- **get_offer_types**\()
+
+- **get_payment_settings**\()
+
+- **get_payment_types**\()
+
+- **get_price_formats**\()
+
+- **get_response_dispositions**\()
+
+- **get_roles**\()
+
+- **get_schedule_types**\()
+
+- **get_session_regeneration_types**\()
+
+- **get_shared_rules**\()
+
+- **get_tracking_domains**\(*domain_type='all'*)
+
+- **get_verticals**\(*vertical_category_id='0'*)
+
+- **get_vertical_categories**\()
 
 **REPORTS**
 
@@ -165,18 +245,18 @@ Supported CAKEApi Functions
 - **clicks**\(*start_date, end_date, affiliate_id='0', advertiser_id='0', offer_id='0', campaign_id='0', creative_id='0', price_format_id='0', include_duplicates='FALSE', include_tests='FALSE', start_at_row='0', row_limit='0'*)
 - **conversion_changes**\(*changes_since, include_new_conversions='FALSE', affiliate_id='0', advertiser_id='0', offer_id='0', campaign_id='0', creative_id='0', include_tests='FALSE', start_at_row='0', row_limit='0', sort_field='conversion_id', sort_descending='FALSE'*)
 
-- **conversions**\(*start_date, end_date, event_type='all', event_id='0', source_affiliate_id='0', brand_advertiser_id='0', channel_id='0', site_offer_id='0', site_offer_contract_id='0', source_affiliate_tag_id='0', brand_advertiser_tag_id='0', site_offer_tag_id='0', campaign_id='0', creative_id='0', price_format_id='0', source_type='all', payment_percentage_filter='both', disposition_type='all', disposition_id='0', source_affiliate_billing_status='all', brand_advertiser_billing_status='all', test_filter='non_tests', start_at_row='0', row_limit='0', sort_field='event_conversion_date', sort_descending='FALSE'*)
-
 - **country_summary**\(*start_date, end_date, affiliate_id='0', affiliate_tag_id='0', advertiser_id='0', offer_id='0', campaign_id='0', event_id='0', revenue_filter='conversions_and_events'*)
 
 - **creative_summary**\(*start_date, end_date, site_offer_id='0', campaign_id='0', event_id='0', event_type='all'*)
 
 - **daily_summary**\(*start_date, end_date, source_affiliate_id='0', brand_advertiser_id='0', site_offer_id='0', vertical_id='0', campaign_id='0', creative_id='0', account_manager_id='0', include_tests='FALSE'*)
 
+- **events_conversions**\(*start_date, end_date, event_type='all', event_id='0', source_affiliate_id='0', brand_advertiser_id='0', channel_id='0', site_offer_id='0', site_offer_contract_id='0', source_affiliate_tag_id='0', brand_advertiser_tag_id='0', site_offer_tag_id='0', campaign_id='0', creative_id='0', price_format_id='0', source_type='all', payment_percentage_filter='both', disposition_type='all', disposition_id='0', source_affiliate_billing_status='all', brand_advertiser_billing_status='all', test_filter='non_tests', start_at_row='0', row_limit='0', sort_field='event_conversion_date', sort_descending='FALSE'*)
+
+- **leads_by_affiliate**\(*start_date, end_date, vertical_id='0', source_affiliate_id='0', site_offer_id='0', source_affiliate_manager_id='0', upsell='upsells_and_non_upsells', lead_tier_id='0', start_at_row='0', row_limit='0'*)
+
 - **leads_by_buyer**\(*start_date, end_date, vertical_id='0', buyer_id='0', buyer_contract_id='0', status_id='0', sub_status_id='0', start_at_row='0', row_limit='0', sort_field='transaction_date', sort_descending='FALSE'*)
     
-- **leads_by_affiliate**\(*start_date, end_date, affiliate_id='0', contact_id='0'*)
-
 - **lite_clicks_advertiser_summary**\(*start_date, end_date, advertiser_id='0', advertiser_manager_id='0', advertiser_tag_id='0', event_id='0', revenue_filter='conversions_and_events'*)
 
 - **lite_clicks_affiliate_summary**\(*start_date, end_date, affiliate_id='0', affiliate_manager_id='0', affiliate_tag_id='0', offer_tag_id='0', event_id='0', revenue_filter='conversions_and_events'*)
@@ -213,10 +293,148 @@ Supported CAKEApi Functions
 
 - **update_conversion**\(*offer_id, conversion_id='0', request_session_id='0', transaction_id='', payout='', add_to_existing_payout='TRUE', received='', received_option='no_change', disposition_type='no_change', disposition_id='0', update_revshare_payout='FALSE', effective_date_option='conversion_date', custom_date='', note_to_append='', disallow_on_billing_status='ignore'*)
 
-**AFFILIATE**
+**SPECIAL**
 
-- **affiliate_offer_feed**\(*affiliate_id, affiliate_api_key, campaign_name='', media_type_category_id='0', vertical_category_id='0', vertical_id='0', offer_status_id='0', tag_id='0', start_at_row='0', row_limit='0'*)
+- **get_advertiser_ids**\()
 
+- **get_affiliate_ids**\()
 
-Found a bug or not seeing an API you need? `Let me know!`_
+- **get_offer_ids**\(*advertiser_id='0'*)
+
+AffiliateAPI Functions
+----------------------
+
+**ACCOUNT**
+
+- **change_account_info**\(*contact_id, contact_type_id='0', first_name='', last_name='', email_address='', title='', phone_work='', phone_cell='', phone_fax='', im_service='', im_name='', tax_class='', ssn_tax_id='', payment_to='', website='', address_street_1='', address_street_2='', address_city='', address_state='', address_country='', address_zip_code=''*)
+
+- **change_language**\(*contact_id, new_language_id*)
+
+- **change_media_types**\(*contact_id, new_media_type_ids*)
+
+- **change_price_formats**\(*contact_id, new_price_format_ids*)
+
+- **change_vertical_categories**\(*contact_id, new_vertical_category_ids*)
+
+- **get_account_info**\(*contact_id*)
+
+- **get_account_manager**\()
+
+- **get_contact_types**\()
+
+- **get_countries**\()
+
+- **get_languages**\()
+
+- **get_media_types**\()
+
+- **get_payment_to_types**\()
+
+- **get_price_formats**\()
+
+- **get_tax_classes**\()
+
+- **get_us_states**\()
+
+- **reset_password**\(*contact_id*)
+
+**OFFERS**
+
+- **add_link_creative**\(*campaign_id, creative_name, offer_link, description=''*)
+
+- **apply_for_offer**\(*offer_contract_id, media_type_id, agreed_to_terms, notes='', agreed_from_ip_address=''*)
+
+- **creative_feed**\(*updates_since, export_feed_id*)
+
+- **get_campaign**\(*campaign_id*)
+
+- **get_creative_code**\(*campaign_id, creative_id*)
+
+- **get_creative_feeds**\()
+
+- **get_creative_types**\()
+
+- **get_featured_offer**\()
+
+- **get_media_type_categories**\()
+
+- **get_offer_statuses**\()
+
+- **get_pixel_tokens**\()
+
+- **get_product_feeds**\()
+
+- **get_sub_affiliates**\(*start_at_row='0', row_limit='0'*)
+
+- **get_suppression_list**\(*offer_id*)
+
+- **get_tags**\()
+
+- **get_vertical_categories**\()
+
+- **get_verticals**\()
+
+- **offer_feed**\(*campaign_name='', media_type_category_id='0', vertical_category_id='0', country_code='', vertical_id='0', offer_status_id='0', tag_id='0', start_at_row='0', row_limit='0'*)
+
+- **send_creative_pack**\(*campaign_id, creative_id='0', contact_id='0'*)
+
+- **set_pixel**\(*campaign_id, pixel_html*)
+
+- **set_postback_url**\(*campaign_id, postback_url*)
+
+- **set_test_link**\(*campaign_id, test_link*)
+
+**REPORTS**
+
+- **bills**\(*start_at_row='0', row_limit='0'*)
+
+- **campaign_summary**\(*start_date, end_date, sub_affiliate='', event_type='all', start_at_row='0', row_limit='0', sort_field='site_offer_id', sort_descending='FALSE'*)
+
+- **clicks**\(*start_date, end_date, offer_id='0', campaign_id='0', include_duplicates='FALSE', start_at_row='0', row_limit='0'*)
+
+- **daily_summary**\(*start_date, end_date, site_offer_id='0'*)
+
+- **events_conversions**\(*start_date, end_date, currency_id, site_offer_id='0', disposition_type='', event_type='all', exclude_bot_traffic='FALSE', start_at_row='0', row_limit='0'*)
+
+- **hourly_summary**\(*start_date, end_date, site_offer_id='0'*)
+
+- **network_news**\(*row_limit='0'*)
+
+- **offer_compliance**\(*start_at_row='0', row_limit='0'*)
+
+- **order_detail_changes**\(*changes_since, include_new_conversions='FALSE', start_at_row='0', row_limit='0', sort_field='conversion_id', sort_descending='FALSE'*)
+
+- **order_details**\(*start_date, end_date, conversion_id='0', order_id='', start_at_row='0', row_limit='0', sort_field='conversion_id', sort_descending='FALSE'*)
+
+- **performance_summary**\(*date*)
+
+- **referral**\(*start_date, end_date, over_minimum, start_at_row='0', row_limit='0', sort_field='affiliate_id', sort_descending='FALSE'*)
+
+- **sub_affiliate_summary**\(*start_date, end_date, site_offer_id='0', start_at_row='0', row_limit='0'*)
+
+- **top_offer_summary**\(*start_date, end_date, vertical_id='0', start_at_row='0', row_limit='0'*)
+
+pycake.models Module
+====================
+pycake.models includes the following models:
+
+- BrandAdvertiser
+    - Initiate with a brand/advertiser record returned via ``pycake.api.AdminAPI.export_advertisers()``
+
+- Campaign
+    - Initiate with a campaign record returned via ``pycake.api.AdminAPI.export_campaigns()``
+
+- Click
+    - Initiate with a click record returned via ``pycake.api.AdminAPI.clicks()``
+
+- EventConversion
+    - Initiate with an event_conversion record returned via ``pycake.api.AdminAPI.events_conversions()``
+
+- SiteOffer
+    - Initiate with a site/offer record returned via ``pycake.api.AdminAPI.export_offers()``
+
+- SourceAffiliate
+    - Initiate with a source/affiliate record returned via ``pycake.api.AdminAPI.export_affiliates()``
+
+Found a bug or not seeing a function you need? `Let me know!`_
                                                 .. _Let me know!: https://github.com/heytimj/pycake/issues
