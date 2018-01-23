@@ -1,5 +1,9 @@
 # pycake Changelog
 
+#v2.0.1
+- January 23, 2018
+- pypi distirbution still referencing 1.12.0 package contents
+
 ##v2.0.0
 - January 23, 2018
 - `pycake.api.CAKEApi` replaced with `pycake.api.AdminAPI`

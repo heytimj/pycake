@@ -3,14 +3,14 @@ from setuptools import setup
 setup(
   name = 'pycake',
   packages = ['pycake'],
-  version = '2.0.0',
+  version = '2.0.1',
   description = 'Python SDK for CAKE API',
   long_description = open('README.rst').read(),
   author = 'Timothy Johnson',
   author_email = 'tim@getcake.com',
   license = 'MIT',
   url = 'https://github.com/heytimj/pycake', 
-  download_url = 'https://github.com/heytimj/pycake/archive/2.0.0.tar.gz', 
+  download_url = 'https://github.com/heytimj/pycake/archive/2.0.1.tar.gz', 
   keywords = ['cake', 'api', 'sdk'],
   classifiers = [],
   install_requires = [
