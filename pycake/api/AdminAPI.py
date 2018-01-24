@@ -2079,7 +2079,7 @@ class AdminAPI(object):
             source_affiliate_manager_id='0', upsell='upsells_and_non_upsells',
             lead_tier_id='0', start_at_row='0', row_limit='0', **kwargs):
 
-        api_url = '{}://{}/api/1/reports.asmx/LeadsByAffiliateExport'.format(
+        api_url = '{}://{}/api/2/reports.asmx/LeadsByAffiliateExport'.format(
             self.protocol, self.admin_domain) 
 
         parameters = _OrderedDict()

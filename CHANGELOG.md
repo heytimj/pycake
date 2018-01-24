@@ -1,5 +1,9 @@
 # pycake Changelog
 
+#v2.0.4
+- January 24, 2018
+- Bug fix: pycake.api.AdminAPI.leads_by_affiliate() was pointed to incorrect api endpoint
+
 #v2.0.1,2,3
 - January 23-24, 2018
 - Bug fix: pypi packaging errors
