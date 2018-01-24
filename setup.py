@@ -1,16 +1,17 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
   name = 'pycake',
-  packages = ['pycake'],
-  version = '2.0.1',
+  packages = find_packages(),
+  include_package_date=True,
+  version = '2.0.3',
   description = 'Python SDK for CAKE API',
   long_description = open('README.rst').read(),
   author = 'Timothy Johnson',
   author_email = 'tim@getcake.com',
   license = 'MIT',
   url = 'https://github.com/heytimj/pycake', 
-  download_url = 'https://github.com/heytimj/pycake/archive/2.0.1.tar.gz', 
+  download_url = 'https://github.com/heytimj/pycake/archive/2.0.3.tar.gz', 
   keywords = ['cake', 'api', 'sdk'],
   classifiers = [],
   install_requires = [

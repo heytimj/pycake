@@ -1,0 +1,7 @@
+- find a way to point to relevant WSDL page for each API function
+- add docstrings
+- special api function ideas: 
+	-clone_affiliate_campaigns()
+	-format_for_cake_import()
+	-export_as_csv()
+	  -maybe this is a new response format?

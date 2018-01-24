@@ -5,7 +5,4 @@ test.py
 /dist
 /build
 /pycake.egg-info
-MANIFEST
-todo.txt
-old_README.rst
 /__pycache__
