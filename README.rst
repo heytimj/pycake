@@ -13,16 +13,16 @@ Introduction
     >>> ckadmin = AdminAPI('somecakedomain.com', api_key='ADhakjnOtAreALkEY')
     >>> offer_edit_response = ckadmin.edit_offer(offer_id=4, click_cookie_days=60)
 
-New in 2.0.0
+New in 2.1.0
 ============
-- Previous ``pycake.api.CAKEApi`` class replaced with ``pycake.api.AdminAPI``
-- Added ``pycake.api.AffiliateAPI`` class
-- Previous ``pycake.api.CAKEApi.get(item)`` split into separate ``pycake.api.AdminAPI`` functions for each item. Some new items added.
-- ``pycake.api.AdminAPI.leads_by_affiliate()`` underlying API upgraded
+- added ``pycake.api.BuyerAPI`` class
+- added ``pycake.api.AdminAPI.get_lead_return_reasons()`` function
+- changed ``pycake.api.AdminAPI.conversion_changes()`` to ``pycake.AdminAPI.event_conversion_changes()`` and updated to underlying API v17
+- updated ``pycake.api.AdminAPI.export_campaigns()`` to underlying api v8
 
 Python
 ======
-Supports 2.x and 3.x
+Only really tested in 3.4+ but *probably* works in 2.7.10+
 
 Installation
 ============
@@ -33,10 +33,11 @@ Installation
     
 pycake.api Module
 =================
-pycake.api contains two classes:
+pycake.api contains three classes:
 
 - **AdminAPI**\(*admin_domain, api_key=None, response_format=ResponseFormat.JSON, use_https=True*)
 - **AffiliateAPI**\(*admin_domain, affiliate_id, api_key, response_format=ResponseFormat.JSON, use_https=True*)
+- **BuyerAPI**\(*admin_domain, response_format=ResponseFormat.JSON, use_https=True*)
 
 **Initialize an AdminAPI object with an API key**
 
@@ -205,6 +206,8 @@ AdminAPI Functions
 - **get_languages**\()
 
 - **get_lead_info**\(*lead_id, vertical_id='0'*)
+
+- **get_lead_return_reasons**\()
 
 - **get_lead_tier_groups**\(*lead_tier_group_id='0'*)
 
@@ -413,6 +416,13 @@ AffiliateAPI Functions
 - **sub_affiliate_summary**\(*start_date, end_date, site_offer_id='0', start_at_row='0', row_limit='0'*)
 
 - **top_offer_summary**\(*start_date, end_date, vertical_id='0', start_at_row='0', row_limit='0'*)
+
+BuyerAPI Functions
+------------------
+- **get_return_reasons**\()
+- **return_lead**\(*lead_id, return_reason_id, buyer_contract_id='0'*)
+- **update_lead**\(*lead_id, buyer_contract_id='0', status='', sub_status='', amount='0', add_to_existing='TRUE', field_name='', field_value='', return_reason_id='0'*)
+
 
 pycake.models Module
 ====================

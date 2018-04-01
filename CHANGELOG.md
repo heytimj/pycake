@@ -1,8 +1,15 @@
 # pycake Changelog
 
+#v2.1.0
+- March 31, 2018
+- added `pycake.api.BuyerAPI` class
+- added `pycake.api.AdminAPI.get_lead_return_reasons()` function
+- changed `pycake.api.AdminAPI.conversion_changes()` to `pycake.AdminAPI.event_conversion_changes()` and updated to underlying API v17
+- updated `pycake.api.AdminAPI.export_campaigns()` to underlying api v8
+
 #v2.0.4
 - January 24, 2018
-- Bug fix: pycake.api.AdminAPI.leads_by_affiliate() was pointed to incorrect api endpoint
+- Bug fix: `pycake.api.AdminAPI.leads_by_affiliate()` was pointed to incorrect api endpoint
 
 #v2.0.1,2,3
 - January 23-24, 2018

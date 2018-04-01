@@ -5,4 +5,5 @@ test.py
 /dist
 /build
 /pycake.egg-info
-/__pycache__
+/__pycache_
+/venv

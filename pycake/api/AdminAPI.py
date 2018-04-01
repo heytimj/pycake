@@ -1265,21 +1265,22 @@ class AdminAPI(object):
         return self._make_api_call(url=api_url, params=parameters)
 
 
-    @_must_have_one(['offer_id', 'affiliate_id', 'campaign_id'])
+    @_must_have_one(['campaign_id', 'site_offer_id', 'source_affiliate_id'])
     def export_campaigns(
-            self, campaign_id='0', offer_id='0', affiliate_id='0',
-            account_status_id='0', media_type_id='0', start_at_row='0',
-            row_limit='0', sort_field='campaign_id', sort_descending='FALSE',
-            **kwargs):
+            self, campaign_id='0', site_offer_id='0', source_affiliate_id='0',
+            channel_id='0', account_status_id='0', media_type_id='0',
+            start_at_row='0', row_limit='0', sort_field='campaign_id',
+            sort_descending='FALSE', **kwargs):
 
-        api_url = '{}://{}/api/7/export.asmx/Campaigns'.format(self.protocol,
+        api_url = '{}://{}/api/8/export.asmx/Campaigns'.format(self.protocol,
             self.admin_domain)
 
         parameters = _OrderedDict()
         parameters['api_key'] = self.api_key
         parameters['campaign_id'] = campaign_id
-        parameters['offer_id'] = offer_id
-        parameters['affiliate_id'] = affiliate_id
+        parameters['site_offer_id'] = site_offer_id
+        parameters['source_affiliate_id'] = source_affiliate_id
+        parameters['channel_id'] = channel_id
         parameters['account_status_id'] = account_status_id
         parameters['media_type_id'] = media_type_id
         parameters['start_at_row'] = start_at_row
@@ -1639,6 +1640,16 @@ class AdminAPI(object):
         return self._make_api_call(url=api_url, params=parameters)
 
 
+    def get_lead_return_reasons(self):
+
+        api_url = '{}://{}/buyers/api/1/leads.asmx/GetReturnReasons'.format(
+            self.protocol, self.admin_domain)
+
+        parameters = {}
+
+        return self._make_api_call(url=api_url, params=parameters)
+
+
     def get_lead_tier_groups(self, lead_tier_group_id='0', **kwargs):
 
         api_url = '{}://{}/api/1/get.asmx/LeadTierGroups'.format(
@@ -1897,23 +1908,24 @@ class AdminAPI(object):
         return self._make_api_call(url=api_url, params=parameters)
 
 
-    def conversion_changes(
-            self, changes_since, include_new_conversions='FALSE',
-            affiliate_id='0', advertiser_id='0', offer_id='0',
-            campaign_id='0', creative_id='0', include_tests='FALSE',
-            start_at_row='0', row_limit='0', sort_field='conversion_id',
-            sort_descending='FALSE', **kwargs):
+    def event_conversion_changes(
+            self, changes_since, include_new_event_conversions='FALSE',
+            source_affiliate_id='0', brand_advertiser_id='0',
+            site_offer_id='0', campaign_id='0', creative_id='0',
+            include_tests='FALSE', start_at_row='0', row_limit='0',
+            sort_field='event_conversion_date', sort_descending='FALSE',
+            **kwargs):
 
-        api_url = '{}://{}/api/10/reports.asmx/ConversionChanges'.format(
+        api_url = '{}://{}/api/17/reports.asmx/EventConversionChanges'.format(
             self.protocol, self.admin_domain)
 
         parameters = _OrderedDict()
         parameters['api_key'] = self.api_key
         parameters['changes_since'] = str(changes_since)
-        parameters['include_new_conversions'] = include_new_conversions
-        parameters['affiliate_id'] = affiliate_id
-        parameters['advertiser_id'] = advertiser_id
-        parameters['offer_id'] = offer_id
+        parameters['include_new_event_conversions'] = include_new_event_conversions
+        parameters['source_affiliate_id'] = source_affiliate_id
+        parameters['brand_advertiser_id'] = brand_advertiser_id
+        parameters['site_offer_id'] = site_offer_id
         parameters['campaign_id'] = campaign_id
         parameters['creative_id'] = creative_id
         parameters['include_tests'] = include_tests
